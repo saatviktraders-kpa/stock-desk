@@ -37,6 +37,22 @@ class ProductController {
     }
   }
 
+  static async update(req, res) {
+    try {
+      const { _id } = req.params;
+      const data = req.body;
+      if (data._id) delete data._id
+      console.log(data, _id)
+      const results = await ProductModel.update(_id, data);
+      return res.json(results);
+    }
+    catch (err) {
+      console.log(err)
+      const error = err instanceof RestError ? err.error : new RestError().error;
+      return res.status(error.status).json(error);
+    }
+  }
+
   static async delete(req, res) {
     try {
       const { _id, qty } = req.params;

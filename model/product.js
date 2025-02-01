@@ -39,10 +39,16 @@ class ProductModel {
     return result;
   }
 
+  static async update(_id, data) {
+    const res = await this.#model.findByIdAndUpdate(_id, data, { returnDocument: 'after', lean: true });
+
+    return res;
+  }
+
   static async delete(_id, qty) {
     const result = await this.#model.findById(_id).lean();
 
-    if (result.quantity === qty) {
+    if (result.quantity === Number(qty)) {
       const res = await this.#model.findByIdAndUpdate(_id, { isDeleted: true }, { returnDocument: 'after', lean: true });
       return res;
     }
