@@ -1,7 +1,7 @@
 // import { useSearchParams } from "react-router-dom";
 import { useDeleteProduct, useProductList } from "../../hooks/product-api"
 import { useState } from "react";
-import { Button, Input, Row, Table, Col, Spin, Alert, Modal, Typography, Flex, App } from "antd";
+import { Button, Input, Row, Table, Col, Spin, Alert, Modal, Typography, Flex, App, Popconfirm } from "antd";
 import Create from "./Create";
 import moment from "moment";
 // import ListPDF from "./ListPDF";
@@ -92,7 +92,9 @@ function Product() {
       render: (_, row) => (
         <Row justify='center' style={{ gap: 10 }}>
           <Button icon={<EditOutlined />} onClick={() => setIsUpdateOpen(row)} />
-          <Button danger icon={<DeleteOutlined />} onClick={() => deleteProd({ _id: row._id, qty: row.quantity })} />
+          <Popconfirm title='Are you sure?' onConfirm={() => deleteProd({ _id: row._id, qty: row.quantity })}>
+            <Button danger icon={<DeleteOutlined />} />
+          </Popconfirm>
         </Row>
       )
     },
