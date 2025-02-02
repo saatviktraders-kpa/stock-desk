@@ -128,6 +128,9 @@ function Detail() {
           </Popconfirm>
         )}
       </Flex>
+      {/* <PDFViewer style={{ width: '100%', height: '100vh' }}>
+        <BillPDF bill={{ ...data, productDetails }} />
+      </PDFViewer> */}
     </Card>
   )
 }
