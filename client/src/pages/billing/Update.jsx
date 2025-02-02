@@ -1,32 +1,47 @@
-import { Row, Col, Form, Input, InputNumber, Button, Flex, App, Card, Typography, Divider, Select } from "antd"
+import { Row, Col, Form, Input, InputNumber, Button, Flex, App, Card, Typography, Divider, Select, Alert, Spin } from "antd"
 import { PlusOutlined, CloseOutlined } from '@ant-design/icons'
 import { useProductList } from "../../hooks/product-api"
-import { useCreateBill } from "../../hooks/billing-api"
+import { useBillDetail, useUpdateBill } from "../../hooks/billing-api"
 import { useMemo } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 
 const rule = [{ required: true, message: 'Please enter this field' }]
 
 function Create() {
+  const { id } = useParams();
+  const { data: bill, isLoading: isBillLoading, isError: isBillError } = useBillDetail(id);
   const [form] = Form.useForm();
   const navigate = useNavigate()
   const { isLoading, isError, data } = useProductList();
-  const createBill = useCreateBill()
+  const updateBill = useUpdateBill()
   const { message: msg } = App.useApp()
 
   async function onFinish(data) {
+    console.log(data)
+    // return
     try {
-      await createBill.mutateAsync(data)
-      msg.success('Bill created successfully');
-      navigate('/billing');
+      await updateBill.mutateAsync({ id, data })
+      msg.success('Bill updated successfully');
+      navigate('/billing/' + id);
     }
     catch (err) {
       console.error(err)
-      msg.error('Failed to create bill')
+      msg.error('Failed to update bill')
     }
   }
 
   const productMap = useMemo(() => data?.reduce((agg, curr) => ({ ...agg, [curr.uid]: curr }), {}) || {}, [data]);
+
+  if (isError || isBillError)
+    return <Alert type="error" message='Failed to load details' />
+
+  if (isBillLoading || isLoading)
+    return <Spin />
+
+  const initial = bill && {
+    buyer: bill.buyer,
+    products: bill.products
+  }
 
   const client = <>
     <Typography.Title level={5}>Buyer Information</Typography.Title>
@@ -59,7 +74,7 @@ function Create() {
   return (
     <>
       <Card style={{ minHeight: '100%' }}>
-        <Typography.Title level={4}>Create a Bill</Typography.Title>
+        <Typography.Title level={4}>{id ? 'Update' : 'Create'} a Bill</Typography.Title>
         <Divider />
         <Form
           form={form}
@@ -69,6 +84,7 @@ function Create() {
           labelCol={{ span: 3 }}
           labelAlign="left"
           preserve={false}
+          initialValues={initial}
         >
           {client}
           <Typography.Title level={5}>Product List</Typography.Title>
@@ -177,8 +193,8 @@ function Create() {
             )}
           </Form.List>
           <Flex justify='end' gap={10} style={{ marginTop: '10px' }}>
-            <Link to={-1}><Button disabled={createBill.isLoading}>Discard</Button></Link>
-            <Button loading={createBill.isLoading} htmlType="submit" type="primary">Create Bill</Button>
+            <Link to={-1}><Button disabled={updateBill.isLoading}>Discard</Button></Link>
+            <Button loading={updateBill.isLoading} htmlType="submit" type="primary">{id ? 'Update' : 'Create'} Bill</Button>
           </Flex>
         </Form>
       </Card>

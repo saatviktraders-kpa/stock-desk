@@ -53,6 +53,16 @@ class BillModel {
     return result;
   }
 
+  static async update(_id, data) {
+    const result = await this.#model.findById(_id).lean();
+
+    if (!result)
+      throw new RestError(404, 'ERR_NOT_FOUND', 'bill not found');
+
+    const res = await this.#model.findByIdAndUpdate(_id, data, { returnDocument: 'after', lean: true });
+    return res;
+  }
+
   static async delete(_id) {
     const result = await this.#model.findById(_id).lean();
 

@@ -1,15 +1,18 @@
-import { Spin, Alert, Typography, Card, Divider, Row, Col, Flex, Table, Button, Popconfirm, App } from 'antd';
-import { useParams } from "react-router-dom"
-import { useBillDetail, useBillProductDetail, useCompleteBill } from "../../hooks/billing-api";
+import { Spin, Alert, Typography, Card, Divider, Row, Col, Flex, Table, Button, Popconfirm, App, Space } from 'antd';
+import { Link, useNavigate, useParams } from "react-router-dom"
+import { useBillDetail, useBillProductDetail, useCompleteBill, useDeleteBill } from "../../hooks/billing-api";
 import { useMemo } from 'react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import BillPDF from '../../generators/bill-pdf';
 import moment from 'moment';
 import RecieveNotePDF from '../../generators/recieved-note';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 
 function Detail() {
   const { id } = useParams();
+  const navigate = useNavigate()
   const { data, isLoading, isError } = useBillDetail(id);
+  const deleteBill = useDeleteBill(id)
   const { data: productDetails, isLoading: isLoadingProducts, isError: isErrorProducts } = useBillProductDetail(id);
   const { message: msg } = App.useApp()
   const completeBill = useCompleteBill(id)
@@ -21,6 +24,19 @@ function Detail() {
   if (isError || isErrorProducts)
     return <Alert type="error" title='Failed to load bill' message='Failed to load bill' />
 
+  async function onDelete() {
+    try {
+      await deleteBill.mutateAsync();
+      msg.success('Bill deleted Successfully')
+      navigate('/billing')
+
+    }
+    catch (err) {
+      console.error(err)
+      msg.error('Failed to delete bill')
+    }
+  }
+
   async function onComplete() {
     try {
       await completeBill.mutateAsync();
@@ -30,7 +46,6 @@ function Detail() {
       console.error(err)
       msg.error('Failed to complete bill')
     }
-
   }
 
   const cols = [
@@ -72,7 +87,15 @@ function Detail() {
     <Card>
       <Row justify='space-between'>
         <Typography.Title level={3} style={{ margin: 0 }}>{data.billNo}</Typography.Title>
-        <Typography.Title level={5} style={{ margin: 0 }}>{data.state.toUpperCase()}</Typography.Title>
+        <Space size='large'>
+          <Typography.Title level={5} style={{ margin: 0 }}>{data.state.toUpperCase()}</Typography.Title>
+          <Popconfirm title='Are you sure?' onConfirm={onDelete}>
+            <Button icon={<DeleteOutlined />} danger />
+          </Popconfirm>
+          <Link to={'/billing/update/' + id}>
+            <Button icon={<EditOutlined />} />
+          </Link>
+        </Space>
       </Row>
       <Divider />
       <Row>

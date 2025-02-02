@@ -56,6 +56,19 @@ class BillController {
     }
   }
 
+  static async update(req, res) {
+    try {
+      const { _id } = req.params;
+      const data = req.body;
+      const results = await BillModel.update(_id, data);
+      return res.json(results);
+    }
+    catch (err) {
+      const error = err instanceof RestError ? err.error : new RestError().error;
+      return res.status(error.status).json(error);
+    }
+  }
+
   static async delete(req, res) {
     try {
       const { _id } = req.params;

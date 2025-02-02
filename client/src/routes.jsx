@@ -8,6 +8,7 @@ const ProductDetail = lazy(() => import('./pages/product/Detail'));
 import { Spin } from "antd";
 const BillingList = lazy(() => import("./pages/billing/List"));
 const BillingCreate = lazy(() => import("./pages/billing/Create"));
+const BillingUpdate = lazy(() => import("./pages/billing/Update"));
 const BillingDetail = lazy(() => import("./pages/billing/Detail"));
 
 function RouteController() {
@@ -23,6 +24,7 @@ function RouteController() {
           <Route index element={<BillingList />} />
           <Route path='create' element={<BillingCreate />} />
           <Route path=':id' element={<BillingDetail />} />
+          <Route path='update/:id' element={<BillingUpdate />} />
         </Route>
       </Route>
     </Routes>

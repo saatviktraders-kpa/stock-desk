@@ -20,7 +20,17 @@ export async function createBill(data) {
   return response
 }
 
+export async function updateBill({ id, data: body }) {
+  const { data } = await Client.put(`/bill/update/${id}`, body);
+  return data
+}
+
 export async function completeBill(id) {
   const { data } = await Client.post(`/bill/complete/${id}`);
+  return data
+}
+
+export async function deleteBill(id) {
+  const { data } = await Client.delete(`/bill/delete/${id}`);
   return data
 }
