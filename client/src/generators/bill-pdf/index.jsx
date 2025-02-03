@@ -7,7 +7,7 @@ import Footer from './Footer';
 import Total from './Total';
 
 const W = [4, 29, 8, 7, 4, 7, 9, 5, 8, 8, 11].map(e => e / 100)
-const PROD_PER_PAGE = 45;
+const PROD_PER_PAGE = 35;
 
 function BillPDF({ bill }) {
   const productMap = useMemo(() => bill?.productDetails?.reduce((agg, curr) => ({ ...agg, [curr.uid]: curr }), {}) || {}, [bill?.productDetails]);
