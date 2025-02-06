@@ -63,8 +63,8 @@ function BillTable({ products }) {
             <TD style={{ overflow: 'hidden' }}>{prod.name}</TD>
             <TD style={{ justifyContent: 'center' }}>{prod.hsn}</TD>
             <TD style={{ justifyContent: 'flex-end' }}>{prod.mrp.toFixed(2)}</TD>
-            <TD style={{ justifyContent: 'center' }}>{moment(prod.mfgDate).format('DD/MM/YYYY')}</TD>
-            <TD style={{ justifyContent: 'center' }}>{moment(prod.expDate).format('DD/MM/YYYY')}</TD>
+            <TD style={{ justifyContent: 'center' }}>{prod.mfgDate ? moment(prod.mfgDate).format('DD/MM/YYYY') : '-'}</TD>
+            <TD style={{ justifyContent: 'center' }}>{prod.expDate ? moment(prod.expDate).format('DD/MM/YYYY') : '-'}</TD>
             <TD style={{ justifyContent: 'flex-end' }}>{prod.price.toFixed(2)}</TD>
             <TD style={{ justifyContent: 'center' }}>{prod.quantity}</TD>
             <TD style={{ justifyContent: 'flex-end' }}>{(prod.quantity * prod.price).toFixed(2)}</TD>

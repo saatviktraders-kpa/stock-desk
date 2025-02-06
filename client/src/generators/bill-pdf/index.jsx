@@ -1,33 +1,26 @@
 import { useMemo } from 'react'
-import { Document, Page, Text } from '@react-pdf/renderer'
-import { Table, TD, TR, TH } from '@ag-media/react-pdf-table'
+import { Document, Page, Text, View } from '@react-pdf/renderer'
 import styles from './styles';
 import Header from './Header';
 import Footer from './Footer';
 import Total from './Total';
 
 const W = [4, 29, 8, 7, 4, 7, 9, 5, 8, 8, 11].map(e => e / 100)
-const PROD_PER_PAGE = 35;
 
 function BillPDF({ bill }) {
   const productMap = useMemo(() => bill?.productDetails?.reduce((agg, curr) => ({ ...agg, [curr.uid]: curr }), {}) || {}, [bill?.productDetails]);
   const productAmts = useMemo(() => bill?.products.map((p, i) => calculate(p, i, productMap)), [bill?.products])
-  const totalPages = Math.ceil(productAmts?.length / PROD_PER_PAGE);
 
   return (
     <Document>
-      {
-        Array.from(Array(totalPages).keys()).map((a, i) => (
-          <Page key={i} size='A4' style={styles.page}>
-            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 12, textDecoration: 'underline' }}>TAX INVOICE</Text>
-            <Header bill={bill} />
-            <BillTable products={productAmts?.slice(i * PROD_PER_PAGE, (i + 1) * PROD_PER_PAGE)} />
-            {i === totalPages - 1 && <Total products={productAmts} />}
-            {i === totalPages - 1 && <Footer />}
-            <Text style={{ position: 'absolute', bottom: 10, right: 10, fontSize: 10 }} fixed render={({ pageNumber, totalPages }) => `Page ${pageNumber}/${totalPages}`} />
-          </Page>
-        ))
-      }
+      <Page size='A4' style={styles.page}>
+        <Text fixed style={{ fontSize: 10, textAlign: 'center', marginBottom: 12, textDecoration: 'underline' }}>TAX INVOICE</Text>
+        <Header bill={bill} />
+        <BillTable products={productAmts} />
+        <Total products={productAmts} />
+        <Footer />
+        <Text style={{ position: 'absolute', bottom: 10, right: 10, fontSize: 8 }} fixed render={({ pageNumber, totalPages }) => `Page ${pageNumber}/${totalPages}`} />
+      </Page>
     </Document>
   )
 }
@@ -35,36 +28,34 @@ function BillPDF({ bill }) {
 function BillTable({ products }) {
   return (
     <>
-      <Table trProps={{ wrap: false }} tdStyle={{ fontSize: 8, padding: 1 }} weightings={W}>
-        <TH style={styles.bold}>
-          <TD style={{ justifyContent: 'center' }}>S.No</TD>
-          <TD style={{ justifyContent: 'center' }}>Product Name</TD>
-          <TD style={{ justifyContent: 'center' }}>HSN Code</TD>
-          <TD style={{ justifyContent: 'center' }}>MRP</TD>
-          <TD style={{ justifyContent: 'center' }}>Qty</TD>
-          <TD style={{ justifyContent: 'center' }}>Rate</TD>
-          <TD style={{ justifyContent: 'center' }}>Amount</TD>
-          <TD style={{ justifyContent: 'center' }}>Disc%</TD>
-          <TD style={{ justifyContent: 'center' }}>Disc</TD>
-          <TD style={{ justifyContent: 'center' }}>GST(18%)</TD>
-          <TD style={{ justifyContent: 'center' }}>Net Amt</TD>
-        </TH>
-        {products.map((prod) => (
-          <TR key={prod.i}>
-            <TD style={{ justifyContent: 'center' }}>{prod.i + 1}</TD>
-            <TD style={{ overflow: 'hidden' }}>{prod.product.name}</TD>
-            <TD style={{ justifyContent: 'center' }}>{prod.product.hsn}</TD>
-            <TD style={{ justifyContent: 'flex-end' }}>{prod.product.mrp.toFixed(2)}</TD>
-            <TD style={{ justifyContent: 'center' }}>{prod.order.quantity}</TD>
-            <TD style={{ justifyContent: 'flex-end' }}>{prod.order.rate.toFixed(2)}</TD>
-            <TD style={{ justifyContent: 'flex-end' }}>{prod.calc.amount.toFixed(2)}</TD>
-            <TD style={{ justifyContent: 'center' }}>{prod.order.discount}</TD>
-            <TD style={{ justifyContent: 'flex-end' }}>{prod.calc.disc.toFixed(2)}</TD>
-            <TD style={{ justifyContent: 'flex-end' }}>{prod.calc.gst.toFixed(2)}</TD>
-            <TD style={{ justifyContent: 'flex-end' }}>{prod.calc.net.toFixed(2)}</TD>
-          </TR>
-        ))}
-      </Table>
+      <View fixed style={{ display: 'flex', flexDirection: 'row' }}>
+        <Text style={[styles.cellH, { flex: W[0] }]}>S.No</Text>
+        <Text style={[styles.cellH, { flex: W[1] }]}>Product Name</Text>
+        <Text style={[styles.cellH, { flex: W[2] }]}>HSN Code</Text>
+        <Text style={[styles.cellH, { flex: W[3] }]}>MRP</Text>
+        <Text style={[styles.cellH, { flex: W[4] }]}>Qty</Text>
+        <Text style={[styles.cellH, { flex: W[5] }]}>Rate</Text>
+        <Text style={[styles.cellH, { flex: W[6] }]}>Amount</Text>
+        <Text style={[styles.cellH, { flex: W[7] }]}>Disc%</Text>
+        <Text style={[styles.cellH, { flex: W[8] }]}>Disc Amt</Text>
+        <Text style={[styles.cellH, { flex: W[9] }]}>GST(18%)</Text>
+        <Text style={[styles.cellHLast, { flex: W[10] }]}>Net Amt</Text>
+      </View>
+      {products.map(prod => (
+        <View wrap={false} key={prod.i} style={{ display: 'flex', flexDirection: 'row' }}>
+          <Text style={[styles.cellD, { flex: W[0], textAlign: 'right' }]}>{prod.i + 1}</Text>
+          <Text style={[styles.cellD, { flex: W[1] }]}>{prod.product.name}</Text>
+          <Text style={[styles.cellD, { flex: W[2], textAlign: 'center' }]}>{prod.product.hsn}</Text>
+          <Text style={[styles.cellD, { flex: W[3], textAlign: 'right' }]}>{prod.product.mrp.toFixed(2)}</Text>
+          <Text style={[styles.cellD, { flex: W[4], textAlign: 'right' }]}>{prod.order.quantity}</Text>
+          <Text style={[styles.cellD, { flex: W[5], textAlign: 'right' }]}>{prod.order.rate.toFixed(2)}</Text>
+          <Text style={[styles.cellD, { flex: W[6], textAlign: 'right' }]}>{prod.calc.amount.toFixed(2)}</Text>
+          <Text style={[styles.cellD, { flex: W[7], textAlign: 'center' }]}>{prod.order.discount}</Text>
+          <Text style={[styles.cellD, { flex: W[8], textAlign: 'right' }]}>{prod.calc.disc.toFixed(2)}</Text>
+          <Text style={[styles.cellD, { flex: W[9], textAlign: 'right' }]}>{prod.calc.gst.toFixed(2)}</Text>
+          <Text style={[styles.cellDLast, { flex: W[10], textAlign: 'right' }]}>{prod.calc.net.toFixed(2)}</Text>
+        </View>
+      ))}
     </>
   );
 }

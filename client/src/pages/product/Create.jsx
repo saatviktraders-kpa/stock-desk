@@ -37,8 +37,8 @@ function Create({ onCancel, product }) {
   const initial = product ? {
     uid: randomUID,
     ...product,
-    mfgDate: moment(product.mfgDate),
-    expDate: moment(product.expDate)
+    mfgDate: product.mfgDate ? moment(product.mfgDate) : null,
+    expDate: product.expDate ? moment(product.expDate) : null
   } : { uid: randomUID }
 
   return (
@@ -67,10 +67,10 @@ function Create({ onCancel, product }) {
         <Form.Item name='name' label='Name' rules={rule}>
           <Input placeholder="Enter Name" />
         </Form.Item>
-        <Form.Item name='mfgDate' label='Manufactured Date' rules={rule} help={dateFormat.join(' or ')}>
+        <Form.Item name='mfgDate' label='Manufactured Date' help={dateFormat.join(' or ')}>
           <DatePicker style={{ width: '40%' }} format={dateFormat} />
         </Form.Item>
-        <Form.Item name='expDate' label='Expiry Date' rules={rule} help={dateFormat.join(' or ')}>
+        <Form.Item name='expDate' label='Expiry Date' help={dateFormat.join(' or ')}>
           <DatePicker style={{ width: '40%' }} format={dateFormat} />
         </Form.Item>
         <Form.Item name='quantity' label='Quantity' rules={rule}>

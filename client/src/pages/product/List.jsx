@@ -56,14 +56,14 @@ function Product() {
       title: 'Mfg Date',
       dataIndex: 'mfgDate',
       key: 'name',
-      render: (val) => moment(val).format('DD/MM/YYYY'),
+      render: (val) => val ? moment(val).format('DD/MM/YYYY') : '-',
       align: 'center'
     },
     {
       title: 'Exp Date',
       dataIndex: 'expDate',
       key: 'name',
-      render: (val) => moment(val).format('DD/MM/YYYY'),
+      render: (val) => val ? moment(val).format('DD/MM/YYYY') : '-',
       align: 'center'
     },
     {
