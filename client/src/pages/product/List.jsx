@@ -133,6 +133,9 @@ function Product() {
         dataSource={search ? data.filter(checkSearch) : data}
         rowKey={r => r.uid}
       />
+      {/* <PDFViewer style={{ width: '100%', height: '100vh' }}>
+        <InventoryPDF products={search ? data.filter(checkSearch) : data} />
+      </PDFViewer> */}
       {/* <Modal title={<Typography.Title level={4}>Download Product List</Typography.Title>} open={isProductListOpen} onCancel={() => setProductListOpen(false)} width='40vw' footer={null} maskClosable={false} destroyOnClose>
         <ListPDF products={data} />
       </Modal> */}
