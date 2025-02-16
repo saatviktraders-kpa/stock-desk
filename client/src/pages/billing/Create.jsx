@@ -98,7 +98,7 @@ function Create() {
                             optionFilterProp="label"
                             onChange={v => {
                               form.setFieldValue(['products', name, 'quantity'], productMap[v].quantity)
-                              form.setFieldValue(['products', name, 'rate'], productMap[v].price)
+                              form.setFieldValue(['products', name, 'rate'], productMap[v].mrp)
                               form.setFieldValue(['products', name, 'discount'], 35)
                             }}
                           />

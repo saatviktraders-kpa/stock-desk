@@ -49,11 +49,11 @@ function BillTable({ products }) {
           <Text style={[styles.cellD, { flex: W[2], textAlign: 'center' }]}>{prod.product.hsn}</Text>
           <Text style={[styles.cellD, { flex: W[3], textAlign: 'right' }]}>{prod.product.mrp.toFixed(2)}</Text>
           <Text style={[styles.cellD, { flex: W[4], textAlign: 'right' }]}>{prod.order.quantity}</Text>
-          <Text style={[styles.cellD, { flex: W[5], textAlign: 'right' }]}>{prod.order.rate.toFixed(2)}</Text>
+          <Text style={[styles.cellD, { flex: W[5], textAlign: 'right' }]}>{prod.calc.gstExcludedRate.toFixed(2)}</Text>
           <Text style={[styles.cellD, { flex: W[6], textAlign: 'right' }]}>{prod.calc.amount.toFixed(2)}</Text>
           <Text style={[styles.cellD, { flex: W[7], textAlign: 'center' }]}>{prod.order.discount}</Text>
           <Text style={[styles.cellD, { flex: W[8], textAlign: 'right' }]}>{prod.calc.disc.toFixed(2)}</Text>
-          <Text style={[styles.cellD, { flex: W[9], textAlign: 'right' }]}>{prod.calc.gst.toFixed(2)}</Text>
+          <Text style={[styles.cellD, { flex: W[9], textAlign: 'right' }]}>{prod.calc.tgst.toFixed(2)}</Text>
           <Text style={[styles.cellDLast, { flex: W[10], textAlign: 'right' }]}>{prod.calc.net.toFixed(2)}</Text>
         </View>
       ))}
@@ -62,18 +62,27 @@ function BillTable({ products }) {
 }
 
 function calculate(prod, i, map) {
-  const amount = (prod.rate * prod.quantity);
-  const disc = (amount * (prod.discount / 100));
-  const taxable = (amount - disc);
-  const cgst = (taxable * (prod.cgst / 100));
-  const sgst = (taxable * (prod.sgst / 100));
-  const net = (taxable + cgst + sgst);
+  // Per Product Calculation
+  const gst = prod.cgst + prod.sgst;
+  const gstExcludedRate = prod.rate / ((100 + gst) / 100);
+  const discount = gstExcludedRate * (prod.discount / 100);
+  const effectiveRate = gstExcludedRate - discount;
+  const cgst = effectiveRate * (prod.cgst / 100);
+  const sgst = effectiveRate * (prod.sgst / 100);
+
+  const amount = (gstExcludedRate * prod.quantity);
+  const disc = (discount * prod.quantity);
+  const tcgst = cgst * prod.quantity;
+  const tsgst = sgst * prod.quantity;
+  const tgst = tcgst + tsgst;
+
+  const net = (amount - disc) + tgst;
 
   return {
     i,
-    order: { ...prod, gst: prod.cgst + prod.sgst },
+    order: { ...prod, gst },
     product: map[prod.uid],
-    calc: { amount, disc, taxable, cgst, sgst, net, gst: cgst + sgst }
+    calc: { gstExcludedRate, amount, disc, tgst, net, tsgst, tcgst }
   }
 }
 

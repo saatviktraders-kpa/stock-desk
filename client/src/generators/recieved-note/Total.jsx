@@ -25,8 +25,8 @@ const toWords = new ToWords({
 function Total({ products }) {
   const gross = products.reduce((agg, curr) => agg + curr.calc.amount, 0).toFixed(2);
   const disc = products.reduce((agg, curr) => agg + curr.calc.disc, 0).toFixed(2);
-  const sgst = products.reduce((agg, curr) => agg + curr.calc.sgst, 0).toFixed(2);
-  const cgst = products.reduce((agg, curr) => agg + curr.calc.cgst, 0).toFixed(2);
+  const sgst = products.reduce((agg, curr) => agg + curr.calc.tsgst, 0).toFixed(2);
+  const cgst = products.reduce((agg, curr) => agg + curr.calc.tcgst, 0).toFixed(2);
   const net = products.reduce((agg, curr) => agg + curr.calc.net, 0).toFixed(2);
   const round = ((((net * 100) % 100).toFixed(0)) / 100).toFixed(2);
   const pay = (net - round).toFixed(2);

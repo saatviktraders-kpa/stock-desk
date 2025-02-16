@@ -129,7 +129,7 @@ function Detail() {
         )}
       </Flex>
       {/* <PDFViewer style={{ width: '100%', height: '100vh' }}>
-        <RecieveNotePDF bill={{ ...data, productDetails }} />
+        <BillPDF bill={{ ...data, productDetails }} />
       </PDFViewer> */}
     </Card>
   )
