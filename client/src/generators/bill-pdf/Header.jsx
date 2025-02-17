@@ -18,7 +18,7 @@ function Header({ bill }) {
       </View>
       <View style={[styles.rowsb, { marginTop: 5 }]}>
         <Text style={[styles.bold, { fontSize: 10 }]}>Bill to</Text>
-        <Text style={{ fontSize: 10 }}>Date: {moment().format('DD/MM/YYYY')}</Text>
+        <Text style={{ fontSize: 10 }}>Date: {moment(bill.createdAt).format('DD/MM/YYYY')}</Text>
       </View>
       <View style={{ marginBottom: 10, marginTop: 4 }}>
         <Text style={{ fontSize: 12, ...styles.bold }}>{bill.buyer.name}</Text>
