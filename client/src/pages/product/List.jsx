@@ -121,7 +121,7 @@ function Product() {
         <Flex gap={10}>
           <PDFDownloadLink document={<InventoryPDF products={search ? data.filter(checkSearch) : data} />} fileName={`Inventory_${moment().format('DD/MM/YYYY;HH:mm')}`}>
             {({ error, loading }) => (
-              <Button loading={loading} disabled={error} danger={error}>{error ? 'PDF Generate Failed' : 'Download Inventory List'}</Button>
+              <Button loading={loading} disabled={error} danger={error}>{error ? 'PDF Generate Failed' : 'Download List'}</Button>
             )}
           </PDFDownloadLink>
           {/* <Button onClick={() => setProductListOpen(true)}>Download List</Button> */}

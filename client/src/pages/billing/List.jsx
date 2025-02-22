@@ -1,9 +1,13 @@
 // import { useSearchParams } from "react-router-dom";
+import { useMemo } from 'react'
 import { useBillList } from "../../hooks/billing-api"
+import { useProductList } from "../../hooks/product-api"
 import { useState } from "react";
-import { Button, Input, Row, Table, Col, Spin, Alert } from "antd";
+import { Button, Input, Row, Table, Col, Spin, Alert, Space } from "antd";
 import { Link } from "react-router-dom";
 import moment from "moment";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import BillListPDF from "../../generators/bill-list";
 
 function BillingList() {
   const [search, setSearch] = useState(null);
@@ -11,6 +15,8 @@ function BillingList() {
   // const page = searchParams.get('page');
   // const size = searchParams.get('size');
   const { data, isLoading, isError } = useBillList();
+  const { data: productDetails, isLoading: isLoadingProducts, isError: isErrorProduct } = useProductList();
+  const productMap = useMemo(() => productDetails?.reduce((agg, curr) => ({ ...agg, [curr.uid]: curr }), {}) || {}, [productDetails]);
 
   // useEffect(() => {
   //   setSearchParams({ page: (page || 1), size: (size || 10) })
@@ -57,10 +63,10 @@ function BillingList() {
     },
   ];
 
-  if (isLoading)
+  if (isLoading || isLoadingProducts)
     return <Spin />;
 
-  if (isError)
+  if (isError || isErrorProduct)
     return <Alert type="error" title='Failed to load bills' message='Failed to load bills' />
 
   const checkSearch = (b) => {
@@ -75,7 +81,16 @@ function BillingList() {
         <Col span={10}>
           <Input placeholder="Search Bills" onChange={(e) => setSearch(e.target.value ?? null)} />
         </Col>
-        <Link to='/billing/create'><Button type="primary">Create Bill</Button></Link>
+        <Col>
+          <Space>
+            <Link to='/billing/create'><Button type="primary">Create Bill</Button></Link>
+            <PDFDownloadLink document={<BillListPDF bills={data} productMap={productMap} />} fileName={`Bills_${moment().format('DD/MM/YYYY;HH:mm')}`}>
+              {({ error, loading }) => (
+                <Button loading={loading} disabled={error} danger={error}>{error ? 'PDF Generate Failed' : 'Download Bill List'}</Button>
+              )}
+            </PDFDownloadLink>
+          </Space>
+        </Col>
       </Row>
       <Table
         columns={cols}

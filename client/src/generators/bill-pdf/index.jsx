@@ -4,6 +4,7 @@ import styles from './styles';
 import Header from './Header';
 import Footer from './Footer';
 import Total from './Total';
+import { calculate } from '../../utils/bill';
 
 const W = [4, 29, 8, 7, 4, 7, 9, 5, 8, 8, 11].map(e => e / 100)
 
@@ -60,29 +61,6 @@ function BillTable({ products }) {
   );
 }
 
-function calculate(prod, i, map) {
-  // Per Product Calculation
-  const gst = prod.cgst + prod.sgst;
-  const gstExcludedRate = prod.rate / ((100 + gst) / 100);
-  const discount = gstExcludedRate * (prod.discount / 100);
-  const effectiveRate = gstExcludedRate - discount;
-  const cgst = effectiveRate * (prod.cgst / 100);
-  const sgst = effectiveRate * (prod.sgst / 100);
 
-  const amount = (gstExcludedRate * prod.quantity);
-  const disc = (discount * prod.quantity);
-  const tcgst = cgst * prod.quantity;
-  const tsgst = sgst * prod.quantity;
-  const tgst = tcgst + tsgst;
-
-  const net = (amount - disc) + tgst;
-
-  return {
-    i,
-    order: { ...prod, gst },
-    product: map[prod.uid],
-    calc: { gstExcludedRate, amount, disc, tgst, net, tsgst, tcgst }
-  }
-}
 
 export default BillPDF;
