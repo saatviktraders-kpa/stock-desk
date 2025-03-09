@@ -1,32 +1,35 @@
-// import { useSearchParams } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useDeleteProduct, useProductList } from "../../hooks/product-api"
-import { useState } from "react";
-import { Button, Input, Row, Table, Col, Spin, Alert, Modal, Typography, Flex, App, Popconfirm } from "antd";
+import { useEffect, useState } from "react";
+import { Button, Row, Table, Col, Alert, Modal, Typography, Flex, App, Popconfirm } from "antd";
 import Create from "./Create";
-import moment from "moment";
-// import ListPDF from "./ListPDF";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import InventoryPDF from "../../generators/inventory";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import DebouncedSearch from "../../components/DebouncedSearch";
+import useQueryParams from "../../hooks/useQueryParams";
+import ProductLotInfo from "../../components/ProductLotInfo";
+import AddLot from "./AddLot";
 
 function Product() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { message } = App.useApp();
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isAddLotOpen, setIsAddLotOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(null);
+  const { message } = App.useApp();
   // const [isProductListOpen, setProductListOpen] = useState(false);
-  const [search, setSearch] = useState(null);
   const deleteProduct = useDeleteProduct()
-  // const [searchParams, setSearchParams] = useSearchParams();
-  // const page = searchParams.get('page');
-  // const size = searchParams.get('size');
-  const { data, isLoading, isError } = useProductList();
 
-  // useEffect(() => {
-  //   setSearchParams({ page: (page || 1), size: (size || 10) })
-  // }, [])
-  async function deleteProd(data) {
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useQueryParams(new URLSearchParams(location.search));
+  const { page, size, search } = searchParams;
+  const { data, isFetching, isError, isIdle } = useProductList(searchParams, { enabled: Boolean(page && size), keepPreviousData: true });
+
+  useEffect(() => {
+    if (!page || !size)
+      setSearchParams({ page: 1, size: 10 })
+  }, [])
+
+  async function deleteProd(_id) {
     try {
-      await deleteProduct.mutateAsync(data)
+      await deleteProduct.mutateAsync(_id)
       message.success('Product deleted sucessfully');
     }
     catch {
@@ -36,63 +39,50 @@ function Product() {
 
   const cols = [
     {
-      title: 'UID',
-      dataIndex: 'uid',
-      key: 'uid',
-      align: 'center'
-    },
-    {
-      title: 'HSN Code',
-      dataIndex: 'hsn',
-      key: 'uid',
-      align: 'center'
+      title: 'Brand',
+      dataIndex: 'brand',
+      key: '_id',
+      align: 'center',
+      width: 140
     },
     {
       title: 'Name',
       dataIndex: 'name',
-      key: 'name'
+      key: '_id',
+      render: (v, { _id }) => <Link to={'/product/' + _id}>{v}</Link>
     },
     {
-      title: 'Mfg Date',
-      dataIndex: 'mfgDate',
-      key: 'name',
-      render: (val) => val ? moment(val).format('DD/MM/YYYY') : '-',
-      align: 'center'
-    },
-    {
-      title: 'Exp Date',
-      dataIndex: 'expDate',
-      key: 'name',
-      render: (val) => val ? moment(val).format('DD/MM/YYYY') : '-',
-      align: 'center'
-    },
-    {
-      title: 'Price (INR)',
-      dataIndex: 'price',
-      key: 'name',
-      align: 'center'
+      title: 'HSN Code',
+      dataIndex: 'hsn',
+      key: '_id',
+      align: 'center',
+      width: 150
     },
     {
       title: 'MRP (INR)',
       dataIndex: 'mrp',
-      key: 'uid',
-      align: 'center'
+      align: 'center',
+      width: 150
     },
     {
-      title: 'Quantity',
-      dataIndex: 'quantity',
-      key: 'name',
-      align: 'center'
+      title: 'Lot Information',
+      dataIndex: '_id',
+      key: '_id',
+      align: 'center',
+      width: 350,
+      render: (v) => <ProductLotInfo pid={v} />
     },
     {
       title: 'Actions',
-      dataIndex: 'uid',
+      dataIndex: '_id',
       key: 'name',
       align: 'center',
+      width: 200,
       render: (_, row) => (
         <Row justify='center' style={{ gap: 10 }}>
+          <Button icon={<PlusOutlined />} onClick={() => setIsAddLotOpen(row)} />
           <Button icon={<EditOutlined />} onClick={() => setIsUpdateOpen(row)} />
-          <Popconfirm title='Are you sure?' onConfirm={() => deleteProd({ _id: row._id, qty: row.quantity })}>
+          <Popconfirm title='Are you sure?' description='This action is irreversible and will completely delete this product and its lots' onConfirm={() => deleteProd(row._id)}>
             <Button danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Row>
@@ -100,50 +90,42 @@ function Product() {
     },
   ];
 
-  if (isLoading)
-    return <Spin />;
-
   if (isError)
     return <Alert type="error" title='Failed to load products' message='Failed to load products' />
-
-  const checkSearch = (d) => {
-    const str = `${d.name} ${d.hsn} ${d.uid} ${moment(d.mfgDate).format('DD/MM/YYYY')} ${moment(d.expDate).format('DD/MM/YYYY')}`;
-
-    return str.toLowerCase().includes(search.toLowerCase())
-  }
 
   return (
     <>
       <Row justify='space-between' style={{ margin: '10px 0' }}>
         <Col span={10}>
-          <Input placeholder="Search Products" onChange={(e) => setSearch(e.target.value ?? null)} />
+          <DebouncedSearch defaultValue={search} placeholder="Search Products" onChange={e => setSearchParams({ search: e.target.value ?? undefined, page: 1 })} />
         </Col>
         <Flex gap={10}>
-          <PDFDownloadLink document={<InventoryPDF products={search ? data.filter(checkSearch) : data} />} fileName={`Inventory_${moment().format('DD/MM/YYYY;HH:mm')}`}>
-            {({ error, loading }) => (
-              <Button loading={loading} disabled={error} danger={error}>{error ? 'PDF Generate Failed' : 'Download List'}</Button>
-            )}
-          </PDFDownloadLink>
-          {/* <Button onClick={() => setProductListOpen(true)}>Download List</Button> */}
-          <Button type="primary" onClick={() => setIsOpen(true)}>Add Product</Button>
+          <Button type="primary" onClick={() => setIsAddOpen(true)}>Add Product</Button>
         </Flex>
       </Row>
       <Table
+        bordered
         columns={cols}
-        dataSource={search ? data.filter(checkSearch) : data}
-        rowKey={r => r.uid}
+        loading={isFetching || isIdle}
+        dataSource={data?.result || []}
+        rowKey={r => r._id}
+        pagination={{
+          current: Number(page) || data?.currentPage || 1,
+          pageSize: Number(size) || data?.pageSize || 1,
+          total: data?.totalCount || data?.result.length,
+          onChange: (page, size) => setSearchParams({ page, size }),
+          showSizeChanger: false,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+        }}
       />
-      {/* <PDFViewer style={{ width: '100%', height: '100vh' }}>
-        <InventoryPDF products={search ? data.filter(checkSearch) : data} />
-      </PDFViewer> */}
-      {/* <Modal title={<Typography.Title level={4}>Download Product List</Typography.Title>} open={isProductListOpen} onCancel={() => setProductListOpen(false)} width='40vw' footer={null} maskClosable={false} destroyOnClose>
-        <ListPDF products={data} />
-      </Modal> */}
-      <Modal title={<Typography.Title level={4}>Add Product</Typography.Title>} open={isOpen} onCancel={() => setIsOpen(false)} width='50vw' footer={null} maskClosable={false} destroyOnClose>
-        <Create onCancel={() => setIsOpen(false)} />
+      <Modal title={<Typography.Title level={4}>Add Product</Typography.Title>} open={isAddOpen} onCancel={() => setIsAddOpen(false)} width='55vw' footer={null} maskClosable={false} destroyOnClose>
+        <Create onClose={() => setIsAddOpen(false)} />
       </Modal>
-      <Modal title={<Typography.Title level={4}>Update Product</Typography.Title>} open={Boolean(isUpdateOpen)} onCancel={() => setIsUpdateOpen(false)} width='50vw' footer={null} maskClosable={false} destroyOnClose>
-        <Create product={isUpdateOpen} onCancel={() => setIsUpdateOpen(false)} />
+      <Modal title={<Typography.Title level={4}>Update Product</Typography.Title>} open={isUpdateOpen} onCancel={() => setIsUpdateOpen(false)} width='55vw' footer={null} maskClosable={false} destroyOnClose>
+        <Create product={isUpdateOpen} onClose={() => setIsUpdateOpen(false)} />
+      </Modal>
+      <Modal title={<Typography.Title level={4}>Add Product Lot</Typography.Title>} open={isAddLotOpen} onCancel={() => setIsAddLotOpen(false)} width='45vw' footer={null} maskClosable={false} destroyOnClose>
+        <AddLot product={isAddLotOpen} onClose={() => setIsAddLotOpen(false)} />
       </Modal>
     </>
   )

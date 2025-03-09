@@ -1,0 +1,30 @@
+import { Text, View } from '@react-pdf/renderer'
+import styles from './styles.js';
+const W = [10, 40, 20, 10, 10, 10].map(e => e / 100)
+
+function StockTable({ products }) {
+  return (
+    <>
+      <View fixed style={{ display: 'flex', flexDirection: 'row' }}>
+        <Text style={[styles.cellH, { flex: W[0] }]}>S.No</Text>
+        <Text style={[styles.cellH, { flex: W[1] }]}>Product Name</Text>
+        <Text style={[styles.cellH, { flex: W[2] }]}>HSN Code</Text>
+        <Text style={[styles.cellH, { flex: W[3] }]}>MRP</Text>
+        <Text style={[styles.cellH, { flex: W[4] }]}>Available</Text>
+        <Text style={[styles.cellHLast, { flex: W[5] }]}>Purchased</Text>
+      </View>
+      {products.map((prod, i) => (
+        <View wrap={false} key={prod._id} style={{ display: 'flex', flexDirection: 'row' }}>
+          <Text style={[styles.cellD, { flex: W[0], textAlign: 'right' }]}>{i + 1}</Text>
+          <Text style={[styles.cellD, { flex: W[1] }]}>{prod.name}</Text>
+          <Text style={[styles.cellD, { flex: W[2], textAlign: 'center' }]}>{prod.hsn}</Text>
+          <Text style={[styles.cellD, { flex: W[3], textAlign: 'right' }]}>{prod.mrp.toFixed(2)}</Text>
+          <Text style={[styles.cellD, { flex: W[4], textAlign: 'right' }]}>{prod.available}</Text>
+          <Text style={[styles.cellDLast, { flex: W[5], textAlign: 'right' }]}>{prod.bought}</Text>
+        </View>
+      ))}
+    </>
+  );
+}
+
+export default StockTable;

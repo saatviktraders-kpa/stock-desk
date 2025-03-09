@@ -1,5 +1,5 @@
 import { Menu } from "antd"
-import { HomeOutlined, ProductOutlined, FundOutlined } from "@ant-design/icons"
+import { HomeOutlined, ProductOutlined, UnorderedListOutlined, AuditOutlined, BarcodeOutlined, ShoppingOutlined, TeamOutlined, ShoppingCartOutlined, WalletOutlined } from "@ant-design/icons"
 import { useNavigate, useLocation } from "react-router-dom"
 
 const items = [
@@ -10,24 +10,58 @@ const items = [
   },
   {
     key: 'product',
-    label: 'Products',
+    label: 'Product',
     icon: <ProductOutlined />,
+    children: [
+      {
+        key: '/product',
+        label: 'Product List',
+        icon: <UnorderedListOutlined />,
+      },
+      {
+        key: '/stock',
+        label: 'Stock Report',
+        icon: <AuditOutlined />,
+      }
+    ]
   },
   {
-    key: 'billing',
+    key: '/billing',
     label: 'Billing',
-    icon: <FundOutlined />,
+    icon: <BarcodeOutlined />,
+  },
+  {
+    key: '/purchase',
+    label: 'Purchase',
+    icon: <ShoppingOutlined />,
+  },
+  {
+    key: 'traders',
+    label: 'Traders',
+    icon: <TeamOutlined />,
+    children: [
+      {
+        key: '/buyer',
+        label: 'Buyers',
+        icon: <WalletOutlined />,
+      },
+      {
+        key: '/vendor',
+        label: 'Vendors',
+        icon: <ShoppingCartOutlined />,
+      },
+    ]
   },
 ]
 
 function SideMenu() {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const activeKey = items.find(i => location.pathname.split('/')?.[1] === i.key);
+  const base = location.pathname;
+  const first = base?.split('/')[1];
 
   return (
-    <Menu selectedKeys={[(activeKey?.key || '/')]} items={items} theme="dark" mode="inline" onClick={({ key }) => navigate(key)} />
+    <Menu defaultOpenKeys={['product', 'traders']} selectedKeys={[base || '/', first, '/' + first]} items={items} theme="dark" mode="inline" onClick={({ key }) => navigate(key)} />
   )
 }
 

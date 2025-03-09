@@ -1,12 +1,10 @@
-import { DatePicker, Form, Input, InputNumber, Button, Flex, App, Row, Col } from "antd"
+import { Form, Input, InputNumber, Button, Flex, App, Select } from "antd"
 import { useAddProduct, useUpdateProduct } from "../../hooks/product-api"
-import { generateUID } from "../../utils/product"
-import moment from "moment"
 
 const rule = [{ required: true, message: 'Please enter this field' }]
-const dateFormat = ['DD-MM-YYYY', 'MM-YYYY'];
+const brands = [{ label: 'VLCC', value: 'VLCC' }];
 
-function Create({ onCancel, product }) {
+function CreateProduct({ product, onClose }) {
   const addProduct = useAddProduct()
   const updateProduct = useUpdateProduct()
   const { message: msg } = App.useApp()
@@ -14,32 +12,21 @@ function Create({ onCancel, product }) {
   async function onFinish(data) {
     try {
       if (product) {
-        const { hsn, mfgDate, expDate, name, quantity, price, mrp } = data;
-        await updateProduct.mutateAsync({ hsn, mfgDate, expDate, name, quantity, price, mrp, _id: product._id });
-        msg.success('Product updated successfully');
+        await updateProduct.mutateAsync({ _id: product._id, ...data });
+        msg.success('Product updated sucessfully');
       }
       else {
-        await addProduct.mutateAsync(data)
-        msg.success('Product added successfully');
+        await addProduct.mutateAsync(data);
+        msg.success('Product added sucessfully');
       }
+      onClose()
     }
-    catch (err) {
-      console.error(err)
+    catch {
       msg.error('Failed to add/update product')
-    }
-    finally {
-      onCancel()
     }
   }
 
-  const randomUID = generateUID();
-
-  const initial = product ? {
-    uid: randomUID,
-    ...product,
-    mfgDate: product.mfgDate ? moment(product.mfgDate) : null,
-    expDate: product.expDate ? moment(product.expDate) : null
-  } : { uid: randomUID }
+  const initial = product ? product : {}
 
   return (
     <>
@@ -52,43 +39,25 @@ function Create({ onCancel, product }) {
         preserve={false}
         initialValues={initial}
       >
-        <Row gutter={[8, 0]}>
-          <Col span={12}>
-            <Form.Item name='uid' label='Product ID' rules={rule} labelCol={{ span: 10 }}>
-              <Input placeholder="Enter Product ID" disabled={Boolean(product)} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name='hsn' label='HSN Code' rules={rule}>
-              <Input placeholder="Enter HSN Code" />
-            </Form.Item>
-          </Col>
-        </Row>
+        <Form.Item name='brand' label='Brand' rules={rule}>
+          <Select options={brands} placeholder='Enter brand' />
+        </Form.Item>
         <Form.Item name='name' label='Name' rules={rule}>
           <Input placeholder="Enter Name" />
         </Form.Item>
-        <Form.Item name='mfgDate' label='Manufactured Date' help={dateFormat.join(' or ')}>
-          <DatePicker style={{ width: '40%' }} format={dateFormat} />
+        <Form.Item name='hsn' label='HSN Code' rules={rule}>
+          <Input placeholder="Enter HSN Code" />
         </Form.Item>
-        <Form.Item name='expDate' label='Expiry Date' help={dateFormat.join(' or ')}>
-          <DatePicker style={{ width: '40%' }} format={dateFormat} />
-        </Form.Item>
-        <Form.Item name='quantity' label='Quantity' rules={rule}>
-          <InputNumber placeholder="Enter Quantity" style={{ width: '40%' }} />
-        </Form.Item>
-        <Form.Item name='price' label='Price' rules={rule}>
-          <InputNumber placeholder="Enter Price" style={{ width: '40%' }} />
-        </Form.Item>
-        <Form.Item name='mrp' label='MRP' rules={rule}>
+        <Form.Item name='mrp' label='MRP (INR)' rules={rule}>
           <InputNumber placeholder="Enter Product MRP" style={{ width: '40%' }} />
         </Form.Item>
         <Flex justify='end' gap={10}>
-          <Button disabled={addProduct.isLoading} onClick={onCancel}>Cancel</Button>
-          <Button loading={addProduct.isLoading} htmlType="submit" type="primary">{product ? 'Update' : 'Add'}</Button>
+          <Button disabled={addProduct.isLoading || updateProduct.isLoading} onClick={onClose}>Cancel</Button>
+          <Button loading={addProduct.isLoading || updateProduct.isLoading} htmlType="submit" type="primary">{product ? 'Update' : 'Add'}</Button>
         </Flex>
       </Form>
     </>
   )
 }
 
-export default Create
+export default CreateProduct;
