@@ -1,7 +1,7 @@
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 import styles from './styles.js';
 import Header from './Header.js';
-import StockTable from './StockTable.js';
+import SaleTable from './SaleTable.js';
 import moment from 'moment';
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 function StockReport({
@@ -19,29 +19,19 @@ function StockReport({
           marginBottom: 12,
           textDecoration: 'underline'
         },
-        children: "STOCK REPORT"
-      }), /*#__PURE__*/_jsx(Header, {}), /*#__PURE__*/_jsxs(View, {
+        children: "SALE REPORT"
+      }), /*#__PURE__*/_jsx(Header, {}), /*#__PURE__*/_jsx(View, {
         style: {
           marginVertical: 10
         },
-        children: [data.during && /*#__PURE__*/_jsxs(Text, {
+        children: data.during && /*#__PURE__*/_jsxs(Text, {
           style: {
             fontSize: 10
           },
-          children: ["Purchase Duration: ", moment(data.during.from).format('DD-MM-YYYY'), " to ", moment(data.during.to).format('DD-MM-YYYY')]
-        }), data.less && /*#__PURE__*/_jsxs(Text, {
-          style: {
-            fontSize: 10
-          },
-          children: ["Minimum Quantity Limit: ", data.less]
-        }), data.more && /*#__PURE__*/_jsxs(Text, {
-          style: {
-            fontSize: 10
-          },
-          children: ["Maximum Quantity Limit: ", data.more]
-        })]
-      }), /*#__PURE__*/_jsx(StockTable, {
-        products: data.products
+          children: ["Sale Duration: ", moment(data.during.from).format('DD-MM-YYYY'), " to ", moment(data.during.to).format('DD-MM-YYYY')]
+        })
+      }), /*#__PURE__*/_jsx(SaleTable, {
+        sales: data.sales
       }), /*#__PURE__*/_jsx(Text, {
         style: {
           position: 'absolute',

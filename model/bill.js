@@ -138,7 +138,7 @@ class BillModel {
   }
 
   static async markDelivered(_id) {
-    const bill = await this.#model.findById(_id, 'order').lean();
+    const bill = await this.#model.findById(_id, 'order billDate').lean();
 
     if (!bill)
       throw new RestError(404, 'ERR_NOT_FOUND', 'bill not found');
@@ -182,7 +182,7 @@ class BillModel {
     if (!canDeliver)
       throw new RestError(400, 'ERR_NOT_ENOUGH_STOCK', 'not enough stock');
 
-    const res = await SaleModel.addSale({ billId: _id, sale: saleData }, saleLotData);
+    const res = await SaleModel.addSale({ billId: _id, sale: saleData, billDate: bill.billDate }, saleLotData);
     await ProductModel.lotBulkOps(lotOps);
     await this.#model.findByIdAndUpdate(_id, { state: 'delivered' });
 

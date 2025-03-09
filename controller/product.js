@@ -167,7 +167,7 @@ class ProductController {
       if (more)
         prodStock = prodStock.filter(p => (p.available <= more))
 
-      const stream = await PDFEngine.generatePDFStream('product-stock', prodStock);
+      const stream = await PDFEngine.generatePDFStream('product-stock', { products: prodStock, during: (from && to) ? { from, to } : null, less, more });
       stream.pipe(res);
     }
     catch (err) {

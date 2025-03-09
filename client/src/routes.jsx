@@ -11,6 +11,7 @@ const BillingList = lazy(() => import("./pages/billing/List"));
 const BillingCreate = lazy(() => import("./pages/billing/Create"));
 const BillingUpdate = lazy(() => import("./pages/billing/Update"));
 const BillingDetail = lazy(() => import("./pages/billing/Detail"));
+const BillingReport = lazy(() => import("./pages/billing/Report"));
 const BuyerList = lazy(() => import("./pages/trader/Buyer"));
 const VendorList = lazy(() => import("./pages/trader/Vendor"));
 const PurchaseList = lazy(() => import("./pages/purchase/List"));
@@ -35,6 +36,7 @@ function RouteController() {
           <Route path='create' element={<BillingCreate />} />
           <Route path=':id' element={<BillingDetail />} />
           <Route path='update/:id' element={<BillingUpdate />} />
+          <Route path='report' element={<BillingReport />} />
         </Route>
         <Route path='purchase' element={<Suspense fallback={<Spin />}><Outlet /></Suspense>}>
           <Route index element={<PurchaseList />} />

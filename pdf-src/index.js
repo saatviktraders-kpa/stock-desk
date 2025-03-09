@@ -3,12 +3,14 @@ import BillPDF from './bill-pdf/index.js';
 import HelloWorldPDF from './hello-world.js';
 import DeliveryNote from './delivery-note/index.js';
 import StockReport from './product-stock/index.js';
+import SaleReport from './sale-report/index.js';
 
 const typeMap = {
   'hello-world': HelloWorldPDF,
   'bill': BillPDF,
   'delivery-note': DeliveryNote,
-  'product-stock': StockReport
+  'product-stock': StockReport,
+  'sale-report': SaleReport
 }
 
 class PDFEngine {

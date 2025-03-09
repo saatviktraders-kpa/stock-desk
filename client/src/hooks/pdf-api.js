@@ -11,9 +11,12 @@ export function useDeliveryNote(_id, options = {}) {
   return result
 }
 
-
-
 export function useStockPDF() {
   const mutation = useMutation(f => downloadPDF('/product/pdf?' + new URLSearchParams(f).toString()))
+  return mutation
+}
+
+export function useSalePDF() {
+  const mutation = useMutation(f => downloadPDF('/sale/pdf?' + new URLSearchParams(f).toString()))
   return mutation
 }

@@ -11,6 +11,12 @@ class SaleModel {
     this.#saleLotModel = DB.connection.model('sale_lot', saleLotSchema);
   }
 
+  static async getSaleList(filter = {}) {
+    const result = await this.#model.find(filter).populate({ path: 'billId', select: 'billNo buyerId buyer', populate: { path: 'buyerId', select: 'name' } }).lean();
+
+    return result;
+  }
+
   static async getSale(billId) {
     const result = await this.#model.findOne({ billId });
 
@@ -18,6 +24,7 @@ class SaleModel {
   }
 
   static async addSale(data, saleLots) {
+    console.log(data)
     const result = await this.#model.create(data);
 
     await this.addSaleLots(saleLots.map(s => ({ ...s, saleId: result._id })))

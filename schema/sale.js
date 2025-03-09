@@ -8,6 +8,7 @@ export const saleLotSchema = new Schema({
 
 export const saleSchema = new Schema({
   billId: { type: Schema.Types.ObjectId, required: true, ref: 'bill', unique: true },
+  billDate: { type: Date, required: true },
   sale: [{
     _id: false,
     pid: { type: Schema.Types.ObjectId, required: true, ref: 'product' },
@@ -20,4 +21,4 @@ export const saleSchema = new Schema({
     _id: false,
     received: { type: Number, default: 0 }
   }
-})
+}, { timestamps: true })

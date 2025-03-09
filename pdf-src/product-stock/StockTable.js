@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer'
 import styles from './styles.js';
-const W = [10, 40, 20, 10, 10, 10].map(e => e / 100)
+const W = [5, 50, 12, 10, 10, 13].map(e => e / 100)
 
 function StockTable({ products }) {
   return (
@@ -10,8 +10,8 @@ function StockTable({ products }) {
         <Text style={[styles.cellH, { flex: W[1] }]}>Product Name</Text>
         <Text style={[styles.cellH, { flex: W[2] }]}>HSN Code</Text>
         <Text style={[styles.cellH, { flex: W[3] }]}>MRP</Text>
-        <Text style={[styles.cellH, { flex: W[4] }]}>Available</Text>
-        <Text style={[styles.cellHLast, { flex: W[5] }]}>Purchased</Text>
+        <Text style={[styles.cellH, { flex: W[4] }]}>Available Qty</Text>
+        <Text style={[styles.cellHLast, { flex: W[5] }]}>Purchased Qty</Text>
       </View>
       {products.map((prod, i) => (
         <View wrap={false} key={prod._id} style={{ display: 'flex', flexDirection: 'row' }}>
