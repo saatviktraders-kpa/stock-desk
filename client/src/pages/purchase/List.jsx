@@ -31,7 +31,7 @@ function PurchaseList() {
   const cols = [
     {
       title: 'Date',
-      dataIndex: 'createdAt',
+      dataIndex: 'purchaseDate',
       render: (v) => moment(v).format('DD-MM-YYYY'),
       align: 'center',
       width: 120
