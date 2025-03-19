@@ -115,7 +115,7 @@ function UpdateOrderEntry({ val, onUpdate, display = v => v, validation, msg, di
   );
 }
 
-function OrderManager({ billId, changeAllowed }) {
+function OrderManager({ billId, changeAllowed, returnAllowed }) {
   const { data, isLoading, isError } = useBillOrders(billId);
   const addOrder = useAddBillOrder(billId);
   const removeOrder = useRemoveBillOrder(billId);
@@ -218,6 +218,14 @@ function OrderManager({ billId, changeAllowed }) {
       render: (v) => <Popconfirm title='Remove this order' placement="topLeft" onConfirm={() => remOrder(v)}><Button size="small" danger icon={<CloseOutlined />} disabled={!changeAllowed} /></Popconfirm>,
       width: 100
     },
+    {
+      title: 'Returned',
+      dataIndex: 'return',
+      align: 'right',
+      render: (v, row) => <UpdateOrderEntry k='return' pid={row.pid._id} val={v} onUpdate={onUpdate} display={v => v || 0} />,
+      width: 110,
+      hidden: !returnAllowed
+    },
   ];
 
   const amounts = useMemo(() => {
@@ -266,7 +274,7 @@ function OrderManager({ billId, changeAllowed }) {
       <Table
         bordered
         size="small"
-        columns={cols}
+        columns={cols.filter(c => !c.hidden)}
         dataSource={data}
         loading={isLoading}
         rowKey={r => r.pid._id}

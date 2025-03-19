@@ -1,7 +1,7 @@
 import { Text, View } from '@react-pdf/renderer';
 import styles from './styles.js';
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-const W = [5, 50, 12, 10, 10, 13].map(e => e / 100);
+const W = [4, 38, 10, 8, 10, 10, 10, 10].map(e => e / 100);
 function StockTable({
   products
 }) {
@@ -36,12 +36,22 @@ function StockTable({
         style: [styles.cellH, {
           flex: W[4]
         }],
-        children: "Available Qty"
+        children: "Opening"
       }), /*#__PURE__*/_jsx(Text, {
-        style: [styles.cellHLast, {
+        style: [styles.cellH, {
           flex: W[5]
         }],
-        children: "Purchased Qty"
+        children: "Received"
+      }), /*#__PURE__*/_jsx(Text, {
+        style: [styles.cellH, {
+          flex: W[6]
+        }],
+        children: "Consumed"
+      }), /*#__PURE__*/_jsx(Text, {
+        style: [styles.cellHLast, {
+          flex: W[7]
+        }],
+        children: "Closing"
       })]
     }), products.map((prod, i) => /*#__PURE__*/_jsxs(View, {
       wrap: false,
@@ -77,13 +87,25 @@ function StockTable({
           flex: W[4],
           textAlign: 'right'
         }],
-        children: prod.available
+        children: prod.available + prod.consumed - prod.bought
       }), /*#__PURE__*/_jsx(Text, {
-        style: [styles.cellDLast, {
+        style: [styles.cellD, {
           flex: W[5],
           textAlign: 'right'
         }],
         children: prod.bought
+      }), /*#__PURE__*/_jsx(Text, {
+        style: [styles.cellD, {
+          flex: W[6],
+          textAlign: 'right'
+        }],
+        children: prod.consumed
+      }), /*#__PURE__*/_jsx(Text, {
+        style: [styles.cellDLast, {
+          flex: W[7],
+          textAlign: 'right'
+        }],
+        children: prod.available
       })]
     }, prod._id))]
   });

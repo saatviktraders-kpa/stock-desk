@@ -27,6 +27,7 @@ const billSchema = new Schema({
     discount: { type: Number, required: true },
     cgst: { type: Number, required: true, default: 9 },
     sgst: { type: Number, required: true, default: 9 },
+    return: { type: Number, required: true, default: 0 }
   }],
 }, { timestamps: true });
 

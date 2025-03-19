@@ -17,6 +17,12 @@ class SaleModel {
     return result;
   }
 
+  static async getSaleListShort(filter = {}) {
+    const result = await this.#model.find(filter, 'sale').lean();
+
+    return result;
+  }
+
   static async getSale(billId) {
     const result = await this.#model.findOne({ billId });
 
@@ -24,7 +30,6 @@ class SaleModel {
   }
 
   static async addSale(data, saleLots) {
-    console.log(data)
     const result = await this.#model.create(data);
 
     await this.addSaleLots(saleLots.map(s => ({ ...s, saleId: result._id })))

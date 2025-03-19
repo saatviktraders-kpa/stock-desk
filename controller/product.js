@@ -3,6 +3,7 @@ import RestError from "../utils/error.js";
 import { getPaginationOptions, getPaginationResult } from "../utils/pagination.js";
 import PDFEngine from '../pdf-engine/index.js'
 import moment from "moment";
+import SaleModel from "../model/sale.js";
 
 class ProductController {
   static async getProductList(req, res) {
@@ -152,11 +153,20 @@ class ProductController {
         f.createdAt = { $gte: new Date(from), $lte: new Date(to) }
       }
 
+      let saleMap = await SaleModel.getSaleListShort(f);
+      saleMap = saleMap.reduce((agg, curr) => {
+        for (const p of curr.sale) {
+          agg[p.pid] = agg[p.pid] ? agg[p.pid] + p.quantity : p.quantity
+        }
+        return agg
+      }, {})
+
       const prods = await ProductModel.getProductList({ isDeleted: false })
       let prodStock = prods.map(async p => {
         const lots = await ProductModel.getProductLots({ isDeleted: false, pid: p._id }, true, 'originalQuantity')
         return {
           _id: p._id, name: p.name, hsn: p.hsn, mrp: p.mrp,
+          consumed: saleMap[p._id] || 0,
           available: lots.reduce((agg, curr) => agg + curr.quantity, 0),
           bought: lots.reduce((agg, curr) => agg + ((from && to ? moment(curr.createdAt).isBetween(from, to) : true) ? curr.originalQuantity : 0), 0),
         }

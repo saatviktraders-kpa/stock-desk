@@ -175,7 +175,7 @@ function Detail() {
           }
         </Space>
       </Flex>
-      <OrderManager billId={id} changeAllowed={data.state === 'draft'} />
+      <OrderManager billId={id} changeAllowed={data.state === 'draft'} returnAllowed={data.state === 'delivered'} />
     </Card>
   )
 }
