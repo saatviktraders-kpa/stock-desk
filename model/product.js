@@ -24,7 +24,7 @@ class ProductModel {
   }
 
   static async getProductLots(filter = {}, short = false, custom = null) {
-    const result = await this.#lotModel.find(filter, short ? 'quantity price createdAt' + (custom ? ` ${custom}` : '') : null).lean();
+    const result = await this.#lotModel.find(filter, short ? 'quantity price createdAt purchaseDate' + (custom ? ` ${custom}` : '') : null).lean();
 
     return result;
   }

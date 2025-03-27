@@ -108,13 +108,13 @@ class PurchaseModel {
   }
 
   static async markCompleted(_id) {
-    const purchase = await this.#model.findById(_id, 'purchase').lean();
+    const purchase = await this.#model.findById(_id, 'purchase purchaseDate').lean();
 
     if (!purchase)
       throw new RestError(404, 'ERR_NOT_FOUND', 'purchase not found');
 
     for (const p of purchase.purchase) {
-      await ProductModel.addLot(p)
+      await ProductModel.addLot({ ...p, purchaseDate: purchase.purchaseDate })
     }
     const res = await this.#model.findByIdAndUpdate(_id, { state: 'completed' }, { returnDocument: 'after', lean: true });
     return res;

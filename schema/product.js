@@ -10,6 +10,7 @@ const productSchema = new Schema({
 
 const lotSchema = new Schema({
   pid: { type: Schema.Types.ObjectId, required: true, index: true },
+  purchaseDate: { type: Date, default: new Date(), required: true },
   mfgDate: { type: Date, default: null },
   expDate: { type: Date, default: null },
   quantity: { type: Number, required: true, min: 1 },

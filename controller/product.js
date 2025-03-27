@@ -148,12 +148,9 @@ class ProductController {
   static async getProductStockPDF(req, res) {
     try {
       const { from, to, less, more } = req.query;
-      const f = {}
-      if (from && to) {
-        f.createdAt = { $gte: new Date(from), $lte: new Date(to) }
-      }
+      const f = (field) => (from && to) ? { [field]: { $gte: new Date(from), $lte: new Date(to) } } : {};
 
-      let saleMap = await SaleModel.getSaleListShort(f);
+      let saleMap = await SaleModel.getSaleListShort(f('billDate'));
       saleMap = saleMap.reduce((agg, curr) => {
         for (const p of curr.sale) {
           agg[p.pid] = agg[p.pid] ? agg[p.pid] + p.quantity : p.quantity
@@ -164,11 +161,12 @@ class ProductController {
       const prods = await ProductModel.getProductList({ isDeleted: false })
       let prodStock = prods.map(async p => {
         const lots = await ProductModel.getProductLots({ isDeleted: false, pid: p._id }, true, 'originalQuantity')
+
         return {
           _id: p._id, name: p.name, hsn: p.hsn, mrp: p.mrp,
           consumed: saleMap[p._id] || 0,
           available: lots.reduce((agg, curr) => agg + curr.quantity, 0),
-          bought: lots.reduce((agg, curr) => agg + ((from && to ? moment(curr.createdAt).isBetween(from, to) : true) ? curr.originalQuantity : 0), 0),
+          bought: lots.reduce((agg, curr) => agg + ((from && to ? moment(curr.purchaseDate || curr.createdAt).isBetween(from, to) : true) ? curr.originalQuantity : 0), 0),
         }
       })
       prodStock = await Promise.all(prodStock);

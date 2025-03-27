@@ -29,9 +29,9 @@ function Detail() {
 
   const cols = [
     {
-      title: 'Added on',
+      title: 'Purchased on',
       dataIndex: 'createdAt',
-      render: (v) => moment(v).format('DD/MM/YYYY hh:mm a'),
+      render: (v_, row) => moment(row.purchaseDate || row.createdAt).format('DD/MM/YYYY hh:mm a'),
       width: 200
     },
     {
