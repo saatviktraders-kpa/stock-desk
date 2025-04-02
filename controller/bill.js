@@ -53,7 +53,7 @@ class BillController {
   static async createBill(req, res) {
     try {
       const { body } = req;
-      const years = getCurrentFinancialYearFilter();
+      const years = getCurrentFinancialYearFilter(body.billDate);
       // const total = await BillModel.getBillCount(years.filter);
       const { count } = await BillModel.getFyearBillCount(years.label);
       const billNo = getBillNo(count, years.label);

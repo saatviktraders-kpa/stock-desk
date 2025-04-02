@@ -151,7 +151,7 @@ class BillModel {
 
     for (const amt of salesAmounts) {
       const { pid, quantity } = amt
-      const prodLots = await ProductModel.getProductLots({ pid }, true);
+      const prodLots = await ProductModel.getProductLots({ pid, isDeleted: false }, true);
       const sortedLots = prodLots.sort((a, b) => moment(a.createdAt).diff(moment(b.createdAt)))
       const available = sortedLots.reduce((agg, curr) => agg + curr.quantity, 0);
 
@@ -181,7 +181,6 @@ class BillModel {
 
     if (!canDeliver)
       throw new RestError(400, 'ERR_NOT_ENOUGH_STOCK', 'not enough stock');
-
     const res = await SaleModel.addSale({ billId: _id, sale: saleData, billDate: bill.billDate }, saleLotData);
     await ProductModel.lotBulkOps(lotOps);
     await this.#model.findByIdAndUpdate(_id, { state: 'delivered' });

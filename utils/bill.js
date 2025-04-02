@@ -6,8 +6,8 @@ export function getBillNo(seq, label) {
   return `ST/${label}/${moment().format('MM')}/${sequ}`;
 }
 
-export function getCurrentFinancialYearFilter() {
-  const currTime = moment();
+export function getCurrentFinancialYearFilter(time) {
+  const currTime = time ? moment(time) : moment();
   const currMonth = Number(currTime.format('M'));
   let yearOffset;
 

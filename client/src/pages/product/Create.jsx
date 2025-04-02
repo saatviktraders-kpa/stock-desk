@@ -2,7 +2,7 @@ import { Form, Input, InputNumber, Button, Flex, App, Select } from "antd"
 import { useAddProduct, useUpdateProduct } from "../../hooks/product-api"
 
 const rule = [{ required: true, message: 'Please enter this field' }]
-const brands = [{ label: 'VLCC', value: 'VLCC' }];
+const brands = [{ label: 'VLCC', value: 'VLCC' }, { label:'Ustraa', value:'Ustraa' }];
 
 function CreateProduct({ product, onClose }) {
   const addProduct = useAddProduct()
