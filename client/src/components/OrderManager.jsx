@@ -222,9 +222,8 @@ function OrderManager({ billId, changeAllowed, returnAllowed }) {
       title: 'Returned',
       dataIndex: 'return',
       align: 'right',
-      render: (v, row) => <UpdateOrderEntry k='return' pid={row.pid._id} val={v} onUpdate={onUpdate} display={v => v || 0} />,
+      render: (v, row) => <UpdateOrderEntry k='return' pid={row.pid._id} val={v} onUpdate={onUpdate} display={v => v || 0} disable={!returnAllowed} />,
       width: 110,
-      hidden: !returnAllowed
     },
   ];
 

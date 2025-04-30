@@ -192,6 +192,9 @@ class BillController {
       else if (state === 'completed') {
         results = await BillModel.markCompleted(_id);
       }
+      else if (state === 'return') {
+        results = await BillModel.markReturn(_id);
+      }
       else
         throw new RestError(400, 'ERR_INVALID_CODE', 'invalid state');
 

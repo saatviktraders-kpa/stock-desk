@@ -29,6 +29,8 @@ const billSchema = new Schema({
     sgst: { type: Number, required: true, default: 9 },
     return: { type: Number, required: true, default: 0 }
   }],
+
+  returned: { type: Boolean, default: false }
 }, { timestamps: true });
 
 export default billSchema;

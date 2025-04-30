@@ -16,7 +16,8 @@ const lotSchema = new Schema({
   quantity: { type: Number, required: true, min: 1 },
   originalQuantity: { type: Number, required: true, min: 1 },
   price: { type: Number, required: true },
-  isDeleted: { type: Boolean, default: false }
+  isDeleted: { type: Boolean, default: false },
+  lotType: { type: String, enum: ['normal', 'return'], default: 'normal' }
 }, { timestamps: true })
 
 export { productSchema, lotSchema };

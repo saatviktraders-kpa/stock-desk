@@ -1,4 +1,4 @@
-import { Spin, Alert, Typography, Card, Flex, Space, Button, Popconfirm, App, InputNumber } from 'antd';
+import { Spin, Alert, Typography, Card, Flex, Space, Button, Popconfirm, App, InputNumber, Row } from 'antd';
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useBillDetail, useDeleteBill, useUpdateBillState } from "../../hooks/billing-api";
 import BuyerDetail from '../../components/BuyerDetail';
@@ -148,7 +148,7 @@ function Detail() {
           <Text>Bill Date: {moment(data.billDate).format('DD-MM-YYYY')}</Text>
         </Flex>
         <Space size='large'>
-          <Text style={{ fontSize: '1.2rem' }}>{data.state.toUpperCase()}</Text>
+          <Text style={{ fontSize: '1.2rem' }}>{data.state.toUpperCase()} {data.returned && '| RETURNED'}</Text>
           <Link to={'/billing/update/' + id}>
             <Button icon={<EditOutlined />} />
           </Link>
@@ -175,7 +175,15 @@ function Detail() {
           }
         </Space>
       </Flex>
-      <OrderManager billId={id} changeAllowed={data.state === 'draft'} returnAllowed={data.state === 'delivered'} />
+      <OrderManager billId={id} changeAllowed={data.state === 'draft'} returnAllowed={data.state === 'delivered' && !data.returned} />
+      {
+        data.state === 'delivered' && !data.returned &&
+        <Row justify='end' style={{ margin: '10px 0' }}>
+          <Popconfirm placement='leftTop' title='Caution: This is a one time action only' description='Make sure every return is filed before clicking this. Edit the price of the newly added lots from product section' okText='Execute' onConfirm={() => updateBillState('return')}>
+            <Button type='primary'>Execute Return</Button>
+          </Popconfirm>
+        </Row>
+      }
     </Card>
   )
 }

@@ -192,6 +192,29 @@ class BillModel {
 
   }
 
+  static async markReturn(_id) {
+    const bill = await this.#model.findById(_id, 'order billDate').lean();
+
+    if (!bill)
+      throw new RestError(404, 'ERR_NOT_FOUND', 'bill not found');
+
+    const newLots = bill.order.map(o => ({
+      pid: o.pid,
+      purchaseDate: new Date(),
+      quantity: o.return || 0,
+      originalQuantity: o.return || 0,
+      isDeleted: false,
+      price: 1,
+      lotType: 'return'
+    })).filter(l => l.quantity > 0)
+
+    for (const lot of newLots) {
+      await ProductModel.addLot(lot)
+    }
+
+    await this.#model.findOneAndUpdate({ _id }, { returned: true }).lean();
+  }
+
 
   // static async complete(_id) {
   //   const result = await this.#model.findById(_id).lean();

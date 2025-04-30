@@ -3,6 +3,7 @@ import styles from './styles.js';
 const W = [4, 38, 10, 8, 10, 10, 10, 10].map(e => e / 100)
 
 function StockTable({ products }) {
+  const totalMRP = products.reduce((agg, curr) => agg + curr.available * curr.mrp, 0);
   return (
     <>
       <View fixed style={{ display: 'flex', flexDirection: 'row' }}>
@@ -27,6 +28,7 @@ function StockTable({ products }) {
           <Text style={[styles.cellDLast, { flex: W[7], textAlign: 'right' }]}>{prod.available}</Text>
         </View>
       ))}
+      <Text style={{ fontSize: 10, marginTop: 12 }}>Total MRP: {totalMRP}</Text>
     </>
   );
 }

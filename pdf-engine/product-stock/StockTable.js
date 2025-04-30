@@ -5,6 +5,8 @@ const W = [4, 38, 10, 8, 10, 10, 10, 10].map(e => e / 100);
 function StockTable({
   products
 }) {
+  const totalMRP = products.reduce((agg, curr) => agg + curr.available * curr.mrp, 0);
+  console.log(products);
   return /*#__PURE__*/_jsxs(_Fragment, {
     children: [/*#__PURE__*/_jsxs(View, {
       fixed: true,
@@ -107,7 +109,13 @@ function StockTable({
         }],
         children: prod.available
       })]
-    }, prod._id))]
+    }, prod._id)), /*#__PURE__*/_jsxs(Text, {
+      style: {
+        fontSize: 10,
+        marginTop: 12
+      },
+      children: ["Total MRP: ", totalMRP]
+    })]
   });
 }
 export default StockTable;
