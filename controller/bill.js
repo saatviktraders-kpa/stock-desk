@@ -56,7 +56,7 @@ class BillController {
       const years = getCurrentFinancialYearFilter(body.billDate);
       // const total = await BillModel.getBillCount(years.filter);
       const { count } = await BillModel.getFyearBillCount(years.label);
-      const billNo = getBillNo(count, years.label);
+      const billNo = getBillNo(count, years.label, body.billDate);
       const data = {
         ...body,
         billNo,

@@ -1,9 +1,9 @@
 import moment from "moment";
 const BILL_SEQ_LEN = 5;
 
-export function getBillNo(seq, label) {
+export function getBillNo(seq, label, date) {
   const sequ = String(seq + 1).padStart(BILL_SEQ_LEN, '0');
-  return `ST/${label}/${moment().format('MM')}/${sequ}`;
+  return `ST/${label}/${moment(date).format('MM')}/${sequ}`;
 }
 
 export function getCurrentFinancialYearFilter(time) {
