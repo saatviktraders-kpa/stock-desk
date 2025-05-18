@@ -6,7 +6,7 @@ function StockTable({
   products
 }) {
   const totalMRP = products.reduce((agg, curr) => agg + curr.available * curr.mrp, 0);
-  console.log(products);
+  const totalCost = products.reduce((agg, curr) => agg + curr.cost, 0);
   return /*#__PURE__*/_jsxs(_Fragment, {
     children: [/*#__PURE__*/_jsxs(View, {
       fixed: true,
@@ -114,7 +114,13 @@ function StockTable({
         fontSize: 10,
         marginTop: 12
       },
-      children: ["Total MRP: ", totalMRP]
+      children: ["Total MRP: ", totalMRP.toFixed(2), " INR"]
+    }), /*#__PURE__*/_jsxs(Text, {
+      style: {
+        fontSize: 10,
+        marginTop: 12
+      },
+      children: ["Total Cost: ", totalCost.toFixed(2), " INR"]
     })]
   });
 }

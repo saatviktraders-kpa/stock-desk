@@ -165,6 +165,7 @@ class ProductController {
         return {
           _id: p._id, name: p.name, hsn: p.hsn, mrp: p.mrp,
           consumed: saleMap[p._id] || 0,
+          cost: lots.reduce((agg, curr) => agg + curr.quantity * curr.price, 0),
           available: lots.reduce((agg, curr) => agg + curr.quantity, 0),
           bought: lots.reduce((agg, curr) => agg + ((from && to ? moment(curr.purchaseDate || curr.createdAt).isBetween(from, to) : true) ? curr.originalQuantity : 0), 0),
         }

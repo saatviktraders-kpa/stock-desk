@@ -24,6 +24,7 @@ const toWords = new ToWords({
 
 function Total({ products }) {
   const tqty = products.reduce((agg, curr) => agg + curr.quantity, 0).toFixed(0);
+  const tmrp = products.reduce((agg, curr) => agg + curr.quantity * curr.mrp, 0).toFixed(2);
   const gross = products.reduce((agg, curr) => agg + curr.gross, 0).toFixed(2);
   const disc = products.reduce((agg, curr) => agg + curr.discountAmt, 0).toFixed(2);
   const sgst = products.reduce((agg, curr) => agg + curr.sgst, 0).toFixed(2);
@@ -35,6 +36,7 @@ function Total({ products }) {
   return (
     <View wrap={false} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, marginTop: 10, padding: 4, borderBottom: '1 solid #bbb', borderTop: '1 solid #bbb' }}>
       <Text style={{ fontSize: 10 }}>Total Quantity: {tqty}</Text>
+      <Text style={{ fontSize: 10 }}>Total MRP: {tmrp}</Text>
       <Text style={{ fontSize: 10 }}>Total Gross Amount: {gross}</Text>
       <Text style={{ fontSize: 10 }}>Total Discount Amount: {disc}</Text>
       <Text style={{ fontSize: 10 }}>Total SGST (@ 9%): {sgst}</Text>

@@ -4,6 +4,7 @@ const W = [4, 38, 10, 8, 10, 10, 10, 10].map(e => e / 100)
 
 function StockTable({ products }) {
   const totalMRP = products.reduce((agg, curr) => agg + curr.available * curr.mrp, 0);
+  const totalCost = products.reduce((agg, curr) => agg + curr.cost, 0);
   return (
     <>
       <View fixed style={{ display: 'flex', flexDirection: 'row' }}>
@@ -28,7 +29,8 @@ function StockTable({ products }) {
           <Text style={[styles.cellDLast, { flex: W[7], textAlign: 'right' }]}>{prod.available}</Text>
         </View>
       ))}
-      <Text style={{ fontSize: 10, marginTop: 12 }}>Total MRP: {totalMRP}</Text>
+      <Text style={{ fontSize: 10, marginTop: 12 }}>Total MRP: {totalMRP.toFixed(2)} INR</Text>
+      <Text style={{ fontSize: 10, marginTop: 12 }}>Total Cost: {totalCost.toFixed(2)} INR</Text>
     </>
   );
 }

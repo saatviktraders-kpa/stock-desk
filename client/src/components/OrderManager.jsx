@@ -148,6 +148,11 @@ function OrderManager({ billId, changeAllowed, returnAllowed }) {
 
   const cols = [
     {
+      title: "Sl.No.",
+      render: (_, __, i) => i + 1,
+      width: 60
+    },
+    {
       title: 'Brand',
       dataIndex: ['pid', 'brand'],
       align: 'center',

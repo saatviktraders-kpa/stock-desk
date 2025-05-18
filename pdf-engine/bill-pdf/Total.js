@@ -30,6 +30,7 @@ function Total({
   products
 }) {
   const tqty = products.reduce((agg, curr) => agg + curr.quantity, 0).toFixed(0);
+  const tmrp = products.reduce((agg, curr) => agg + curr.quantity * curr.mrp, 0).toFixed(2);
   const gross = products.reduce((agg, curr) => agg + curr.gross, 0).toFixed(2);
   const disc = products.reduce((agg, curr) => agg + curr.discountAmt, 0).toFixed(2);
   const sgst = products.reduce((agg, curr) => agg + curr.sgst, 0).toFixed(2);
@@ -54,6 +55,11 @@ function Total({
         fontSize: 10
       },
       children: ["Total Quantity: ", tqty]
+    }), /*#__PURE__*/_jsxs(Text, {
+      style: {
+        fontSize: 10
+      },
+      children: ["Total MRP: ", tmrp]
     }), /*#__PURE__*/_jsxs(Text, {
       style: {
         fontSize: 10
