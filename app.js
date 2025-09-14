@@ -15,7 +15,7 @@ function Application({ log } = {}) {
   app.use('/api', authenticate, apiRouter);
 
   // Configuring Frontend
-  app.get('/', (req, res) => res.redirect('/app').end());
+  app.get('/', (req, res) => res.redirect('/app'));
   app.use(Express.static(path.join(path.resolve(), 'client', 'dist')));
   //app.get('/app', (req, res) => res.send('aaa'));
   app.get('/app/?*', (req, res) => res.sendFile(path.join(path.resolve(), 'client', 'dist', 'index.html')));
