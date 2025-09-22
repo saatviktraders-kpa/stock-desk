@@ -17,6 +17,11 @@ function ProductSearch({ onAdd, disable }) {
 
   async function onFinish(data) {
     try {
+      if (data.gst) {
+        data.sgst = data.gst / 2;
+        data.cgst = data.gst / 2;
+        delete data.gst;
+      }
       await onAdd(data);
       message.success('Order added sucessfully')
       reset()
@@ -30,7 +35,6 @@ function ProductSearch({ onAdd, disable }) {
   function handleValueChange(changed) {
     if (changed.pid) {
       const prod = prods?.result.find(p => p._id === changed.pid)
-      console.log(prod)
       setProductSelected(prod)
       form.setFieldValue('rate', prod.mrp)
       form.setFieldValue('discount', 35);
@@ -58,13 +62,16 @@ function ProductSearch({ onAdd, disable }) {
           />
         </Form.Item>
         <Flex>
-          <Form.Item rules={[{ required: true }]} name='quantity' style={{ width: '33%' }} help={'Available: ' + (isLoadingLots ? <Spin size="small" /> : (available || '-'))}>
+          <Form.Item rules={[{ required: true }]} name='quantity' style={{ width: '25%' }} help={'Available: ' + (isLoadingLots ? <Spin size="small" /> : (available || '-'))}>
             <InputNumber placeholder="Quantity" style={{ width: '90%' }} />
           </Form.Item>
-          <Form.Item rules={[{ required: true }]} name='rate' style={{ width: '33%' }} help={'MRP: ' + (productSelected?.mrp || '-') + (productSelected ? ' INR' : '')}>
+          <Form.Item rules={[{ required: true }]} name='gst' style={{ width: '25%' }} help={"SGST + CGST"}>
+            <InputNumber placeholder="GST" style={{ width: '90%' }} />
+          </Form.Item>
+          <Form.Item rules={[{ required: true }]} name='rate' style={{ width: '25%' }} help={'MRP: ' + (productSelected?.mrp || '-') + (productSelected ? ' INR' : '')}>
             <InputNumber placeholder="Rate (GST inc)" style={{ width: '90%' }} addonAfter={<span>INR</span>} />
           </Form.Item>
-          <Form.Item rules={[{ required: true }]} name='discount' style={{ width: '34%' }} help={`CGST: 9% | SGST: 9%`}>
+          <Form.Item rules={[{ required: true }]} name='discount' style={{ width: '25%' }}>
             <InputNumber placeholder="Discount" style={{ width: '100%' }} addonAfter={<span>%</span>} />
           </Form.Item>
         </Flex>
