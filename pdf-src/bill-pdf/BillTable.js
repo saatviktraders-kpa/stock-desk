@@ -20,7 +20,7 @@ function BillTable({ order }) {
         <Text style={[styles.cellH, { flex: W[6] }]}>Amount</Text>
         <Text style={[styles.cellH, { flex: W[7] }]}>Disc%</Text>
         <Text style={[styles.cellH, { flex: W[8] }]}>Disc Amt</Text>
-        <Text style={[styles.cellH, { flex: W[9] }]}>GST(18%)</Text>
+        <Text style={[styles.cellH, { flex: W[9] }]}>GST</Text>
         <Text style={[styles.cellHLast, { flex: W[10] }]}>Net Amt</Text>
       </View>
       {products.map((prod, i) => (

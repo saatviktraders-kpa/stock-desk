@@ -189,6 +189,13 @@ function OrderManager({ billId, changeAllowed, returnAllowed }) {
       width: 110
     },
     {
+      title: 'GST %',
+      dataIndex: 'gst',
+      align: 'right',
+      render: (v, row) => row.sgst + row.cgst,
+      width: 110
+    },
+    {
       title: 'Status',
       align: 'center',
       dataIndex: 'available',
