@@ -1,26 +1,33 @@
-// import { useSearchParams } from "react-router-dom";
-import { useMemo } from 'react'
-import { useBillList } from "../../hooks/billing-api"
-import { useProductList } from "../../hooks/product-api"
-import { useState } from "react";
-import { Button, Input, Row, Table, Col, Spin, Alert, Space } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { Button, Row, Table, Col, Alert, Flex, Space, Popconfirm, App } from "antd";
 import moment from "moment";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import BillListPDF from "../../generators/bill-list";
+import { useEffect } from "react";
+import { useBillList, useDeleteBill } from "../../hooks/billing-api"
+import useQueryParams from "../../hooks/useQueryParams";
+import DebouncedSearch from "../../components/DebouncedSearch";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 function BillingList() {
-  const [search, setSearch] = useState(null);
-  // const [searchParams, setSearchParams] = useSearchParams();
-  // const page = searchParams.get('page');
-  // const size = searchParams.get('size');
-  const { data, isLoading, isError } = useBillList();
-  const { data: productDetails, isLoading: isLoadingProducts, isError: isErrorProduct } = useProductList();
-  const productMap = useMemo(() => productDetails?.reduce((agg, curr) => ({ ...agg, [curr.uid]: curr }), {}) || {}, [productDetails]);
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useQueryParams(new URLSearchParams(location.search));
+  const { page, size, search } = searchParams;
+  const { data, isFetching, isIdle, isError } = useBillList(searchParams, { enabled: Boolean(page && size), keepPreviousData: true });
+  const deleteBill = useDeleteBill()
+  const { message } = App.useApp();
 
-  // useEffect(() => {
-  //   setSearchParams({ page: (page || 1), size: (size || 10) })
-  // }, [])
+  async function deleteB(id) {
+    try {
+      await deleteBill.mutateAsync(id);
+      message.success('Bill deleted sucessfully');
+    } catch {
+      message.error('Failed to delete bill')
+    }
+  }
+
+  useEffect(() => {
+    if (!page || !size)
+      setSearchParams({ page: 1, size: 10 })
+  }, [])
 
   const cols = [
     {
@@ -28,74 +35,89 @@ function BillingList() {
       dataIndex: 'billNo',
       key: 'billNo',
       render: (val, row) => <Link to={'/billing/' + row._id}>{val}</Link>,
+      align: 'center',
+      width: 180
+    },
+    {
+      title: 'Bill Date',
+      dataIndex: 'billDate',
+      render: (v) => moment(v).format('DD-MM-YYYY'),
+      align: 'center',
+      width: 120
     },
     {
       title: 'Buyer Name',
-      dataIndex: ['buyer', 'name'],
-      key: 'billNo'
+      render: (_, row) => (row.buyerId ? row.buyerId.name : row.buyer.name)
     },
     {
       title: 'Buyer GSTIN',
-      dataIndex: ['buyer', 'gst'],
-      key: 'billNo',
-      align: 'center'
+      render: (_, row) => (row.buyerId ? row.buyerId.gstin : row.buyer.gstin) || '-',
+      align: 'center',
+      width: 260
+    },
+    {
+      title: 'Buyer Contact',
+      render: (_, row) => (row.buyerId ? row.buyerId.contact : row.buyer.contact) || '-',
+      align: 'center',
+      width: 150
     },
     {
       title: 'State',
       dataIndex: 'state',
       key: 'billNo',
       render: (val) => val.toUpperCase(),
-      align: 'center'
+      align: 'center',
+      width: 180
     },
     {
-      title: 'Product Count',
-      dataIndex: 'products',
-      key: 'billNo',
-      render: (val) => val.length || 0,
-      align: 'center'
-    },
-    {
-      title: 'Created at',
-      dataIndex: 'createdAt',
-      key: 'billNo',
-      render: (val) => moment(val).format('DD/MM/YYYY hh:mm a'),
-      align: 'center'
-    },
+      title: 'Action',
+      dataIndex: '_id',
+      align: 'center',
+      render: (v, row) => (
+        <Row justify='center'>
+          <Space>
+            <Link to={'/billing/update/' + v}>
+              <Button icon={<EditOutlined />} disabled={row.state !== 'draft'} />
+            </Link>
+            <Popconfirm title='Are you sure?' placement='bottomLeft' onConfirm={() => deleteB(v)}>
+              <Button icon={<DeleteOutlined />} danger disabled={row.state !== 'draft'} />
+            </Popconfirm>
+          </Space>
+        </Row>
+      ),
+      width: 180
+    }
   ];
 
-  if (isLoading || isLoadingProducts)
-    return <Spin />;
-
-  if (isError || isErrorProduct)
+  if (isError)
     return <Alert type="error" title='Failed to load bills' message='Failed to load bills' />
-
-  const checkSearch = (b) => {
-    const str = `${b.billNo} ${b.buyer.name} ${b.buyer.gst}`;
-
-    return str.toLowerCase().includes(search.toLowerCase())
-  }
 
   return (
     <>
       <Row justify='space-between' style={{ margin: '10px 0' }}>
         <Col span={10}>
-          <Input placeholder="Search Bills" onChange={(e) => setSearch(e.target.value ?? null)} />
+          <DebouncedSearch defaultValue={search} placeholder="Search Bill Number" onChange={e => setSearchParams({ search: e.target.value ?? undefined, page: 1 })} />
         </Col>
-        <Col>
-          <Space>
-            <Link to='/billing/create'><Button type="primary">Create Bill</Button></Link>
-            <PDFDownloadLink document={<BillListPDF bills={data} productMap={productMap} />} fileName={`Bills_${moment().format('DD/MM/YYYY;HH:mm')}`}>
-              {({ error, loading }) => (
-                <Button loading={loading} disabled={error} danger={error}>{error ? 'PDF Generate Failed' : 'Download Bill List'}</Button>
-              )}
-            </PDFDownloadLink>
-          </Space>
-        </Col>
+        <Flex gap={10}>
+          <Link to='/billing/create'>
+            <Button type="primary">Create Bill</Button>
+          </Link>
+        </Flex>
       </Row>
       <Table
+        bordered
         columns={cols}
-        dataSource={search ? data.filter(checkSearch) : data}
-        rowKey={r => r.billNo}
+        loading={isFetching || isIdle}
+        dataSource={data?.result || []}
+        rowKey={r => r._id}
+        pagination={{
+          current: Number(page) || data?.currentPage || 1,
+          pageSize: Number(size) || data?.pageSize || 1,
+          total: data?.totalCount || data?.result.length,
+          onChange: (page, size) => setSearchParams({ page, size }),
+          showSizeChanger: false,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+        }}
       />
     </>
   )

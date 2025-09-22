@@ -1,5 +1,5 @@
 import { Menu } from "antd"
-import { HomeOutlined, ProductOutlined, FundOutlined } from "@ant-design/icons"
+import { HomeOutlined, ProductOutlined, AuditOutlined, BarcodeOutlined, ShoppingOutlined, TeamOutlined, ShoppingCartOutlined, WalletOutlined, StockOutlined, BarChartOutlined } from "@ant-design/icons"
 import { useNavigate, useLocation } from "react-router-dom"
 
 const items = [
@@ -9,25 +9,64 @@ const items = [
     icon: <HomeOutlined />,
   },
   {
-    key: 'product',
-    label: 'Products',
+    key: '/product',
+    label: 'Product',
     icon: <ProductOutlined />,
   },
   {
-    key: 'billing',
+    key: '/billing',
     label: 'Billing',
-    icon: <FundOutlined />,
+    icon: <BarcodeOutlined />,
+  },
+  {
+    key: '/purchase',
+    label: 'Purchase',
+    icon: <ShoppingOutlined />,
+  },
+  {
+    key: 'traders',
+    label: 'Traders',
+    icon: <TeamOutlined />,
+    children: [
+      {
+        key: '/buyer',
+        label: 'Buyers',
+        icon: <WalletOutlined />,
+      },
+      {
+        key: '/vendor',
+        label: 'Vendors',
+        icon: <ShoppingCartOutlined />,
+      },
+    ]
+  },
+  {
+    key: 'report',
+    label: 'Reports',
+    icon: <StockOutlined />,
+    children: [
+      {
+        key: '/billing/report',
+        label: 'Sale Report',
+        icon: <AuditOutlined />,
+      },
+      {
+        key: '/stock',
+        label: 'Stock Report',
+        icon: <BarChartOutlined />,
+      }
+    ]
   },
 ]
 
 function SideMenu() {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const activeKey = items.find(i => location.pathname.split('/')?.[1] === i.key);
+  const base = location.pathname;
+  const first = base?.split('/')[1];
 
   return (
-    <Menu selectedKeys={[(activeKey?.key || '/')]} items={items} theme="dark" mode="inline" onClick={({ key }) => navigate(key)} />
+    <Menu defaultOpenKeys={['product', 'traders', 'report']} selectedKeys={[base || '/', first]} items={items} theme="dark" mode="inline" onClick={({ key }) => navigate(key)} />
   )
 }
 

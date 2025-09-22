@@ -1,136 +1,189 @@
-import { Spin, Alert, Typography, Card, Divider, Row, Col, Flex, Table, Button, Popconfirm, App, Space } from 'antd';
+import { Spin, Alert, Typography, Card, Flex, Space, Button, Popconfirm, App, InputNumber, Row } from 'antd';
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { useBillDetail, useBillProductDetail, useCompleteBill, useDeleteBill } from "../../hooks/billing-api";
-import { useMemo } from 'react';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import BillPDF from '../../generators/bill-pdf';
+import { useBillDetail, useDeleteBill, useUpdateBillState } from "../../hooks/billing-api";
+import BuyerDetail from '../../components/BuyerDetail';
+import { DeleteOutlined, DownloadOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import RecieveNotePDF from '../../generators/recieved-note';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import OrderManager from '../../components/OrderManager';
+import { useBillPDF, useDeliveryNote } from '../../hooks/pdf-api';
+import { useSale, useSaleUpdate } from '../../hooks/sale-api';
+import { useState } from 'react';
+
+const { Title, Text } = Typography;
+
+function Payment({ id }) {
+  const [amt, setAmt] = useState(null);
+  const { data, isLoading, isError } = useSale(id)
+  const addPayment = useSaleUpdate(id);
+  const { message } = App.useApp();
+
+  async function add() {
+    if (!amt)
+      return
+
+    try {
+      await addPayment.mutateAsync({ payment: amt })
+      setAmt(null)
+      message.success('Payment Added successfully')
+    }
+    catch {
+      message.error('Failed to add payment')
+    }
+  }
+
+  if (isLoading)
+    return <Spin />;
+
+  if (isError)
+    return <Alert type="error" title='Failed to load bill' message='Failed to load bill' />
+
+  const money = data.sale.reduce((agg, curr) => ({ ...agg, cp: agg.cp + curr.cost, sp: agg.sp + curr.net }), { cp: 0, sp: 0 })
+  const round = ((((money.sp * 100) % 100).toFixed(0)) / 100).toFixed(2)
+  const pl = ((money.sp - round) - money.cp)
+
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <Title level={5}>Payment</Title>
+      <Flex justify='space-between' align='start'>
+        <Space direction='vertical'>
+          <Text>Payment Received: {data.payment.received.toFixed(2)} INR | <strong>Payment Left: {((money.sp - round) - data.payment.received).toFixed(2)} INR</strong></Text>
+          <Text>Cost Price: {money.cp.toFixed(2)} INR | Selling Price: {(money.sp - round).toFixed(2)} INR</Text>
+          <Text type={(pl > 0) ? 'success' : 'danger'}><strong>{pl > 0 ? 'Profit' : 'Loss'}: {pl.toFixed(2)} INR</strong></Text>
+        </Space>
+        <Space>
+          <InputNumber style={{ width: '100%' }} placeholder='Payment Amount' addonBefore={<PlusOutlined />} value={amt} onChange={v => setAmt(v)} />
+          <Button type='primary' onClick={add} disabled={!amt}>Add Payment</Button>
+        </Space>
+      </Flex>
+    </div>
+  )
+}
 
 function Detail() {
   const { id } = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useBillDetail(id);
-  const deleteBill = useDeleteBill(id)
-  const { data: productDetails, isLoading: isLoadingProducts, isError: isErrorProducts } = useBillProductDetail(id);
-  const { message: msg } = App.useApp()
-  const completeBill = useCompleteBill(id)
-  const productMap = useMemo(() => productDetails?.reduce((agg, curr) => ({ ...agg, [curr.uid]: curr }), {}) || {}, [productDetails]);
+  const { refetch: fetchBill, isFetching: isPdfFetching } = useBillPDF(id, { enabled: false })
+  const { refetch: fetchNote, isFetching: isNoteFetching } = useDeliveryNote(id, { enabled: false })
+  const updateState = useUpdateBillState(id)
+  const { message } = App.useApp()
+  const deleteBill = useDeleteBill()
 
-  if (isLoading || isLoadingProducts)
+  async function downloadBillPdf() {
+    try {
+      const { data: file } = await fetchBill()
+
+      const href = URL.createObjectURL(file);
+
+      const link = document.createElement('a');
+      link.href = href;
+      link.setAttribute('download', `Tax-Invoice-${data?.billNo}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(href);
+    }
+    catch (err) {
+      console.error(err)
+      message.error('Failed to download bill pdf')
+    }
+  }
+
+  async function downloadRecieveNote() {
+    try {
+      const { data: file } = await fetchNote()
+
+      const href = URL.createObjectURL(file);
+
+      const link = document.createElement('a');
+      link.href = href;
+      link.setAttribute('download', `Delivery-Note-${data?.billNo}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(href);
+    }
+    catch (err) {
+      console.error(err)
+      message.error('Failed to download note pdf')
+    }
+  }
+
+  async function updateBillState(s) {
+    try {
+      await updateState.mutateAsync(s);
+      message.success('Bill state updated sucessfully');
+    } catch (err) {
+      if (err.response?.data?.code === 'ERR_NOT_ENOUGH_STOCK')
+        return message.error('Not enough stock to deliver')
+      message.error('Failed to update bill state')
+    }
+  }
+
+  async function deleteB(id) {
+    try {
+      await deleteBill.mutateAsync(id);
+      message.success('Bill deleted sucessfully');
+      navigate('/billing')
+    } catch {
+      message.error('Failed to delete bill')
+    }
+  }
+
+  if (isLoading)
     return <Spin />;
 
-  if (isError || isErrorProducts)
+  if (isError)
     return <Alert type="error" title='Failed to load bill' message='Failed to load bill' />
 
-  async function onDelete() {
-    try {
-      await deleteBill.mutateAsync();
-      msg.success('Bill deleted Successfully')
-      navigate('/billing')
-
-    }
-    catch (err) {
-      console.error(err)
-      msg.error('Failed to delete bill')
-    }
-  }
-
-  async function onComplete() {
-    try {
-      await completeBill.mutateAsync();
-      msg.success('Bill Completed Successfully')
-    }
-    catch (err) {
-      console.error(err)
-      msg.error('Failed to complete bill')
-    }
-  }
-
-  const cols = [
-    {
-      title: 'Product UID',
-      dataIndex: 'uid'
-    },
-    {
-      title: 'Product Name',
-      dataIndex: 'uid',
-      render: v => productMap[v].name
-    },
-    {
-      title: 'Quantity Ordered',
-      dataIndex: 'quantity',
-      align: 'center'
-    },
-    {
-      title: 'Quantity Available',
-      dataIndex: 'uid',
-      render: v => productMap[v].quantity,
-      align: 'center'
-    },
-    {
-      title: 'Status',
-      dataIndex: 'uid',
-      render: (v, row) => {
-        if (data.state === 'completed')
-          return <Typography.Text>COMPLETED</Typography.Text>
-
-        const isAvailable = productMap[v].quantity >= row.quantity;
-        return <Typography.Text type={isAvailable ? 'success' : 'danger'}>{isAvailable ? "AVAILABLE" : 'NOT AVAILABLE'}</Typography.Text>
-      },
-      align: 'center'
-    },
-  ]
+  const buyer = data?.buyerId || data?.buyer;
 
   return (
     <Card>
-      <Row justify='space-between'>
-        <Typography.Title level={3} style={{ margin: 0 }}>{data.billNo}</Typography.Title>
+      <Flex justify='space-between'>
+        <Flex vertical>
+          <Text style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{data.billNo}</Text>
+          <Text>Bill Date: {moment(data.billDate).format('DD-MM-YYYY')}</Text>
+        </Flex>
         <Space size='large'>
-          <Typography.Title level={5} style={{ margin: 0 }}>{data.state.toUpperCase()}</Typography.Title>
-          <Popconfirm title='Are you sure?' onConfirm={onDelete}>
-            <Button icon={<DeleteOutlined />} danger />
-          </Popconfirm>
+          <Text style={{ fontSize: '1.2rem' }}>{data.state.toUpperCase()} {data.returned && '| RETURNED'}</Text>
           <Link to={'/billing/update/' + id}>
             <Button icon={<EditOutlined />} />
           </Link>
+          {
+            data.state === 'draft' &&
+            <Popconfirm title='Are you sure?' placement='bottomLeft' onConfirm={() => deleteB(id)}>
+              <Button icon={<DeleteOutlined />} danger />
+            </Popconfirm>
+          }
         </Space>
-      </Row>
-      <Divider />
-      <Row>
-        <Col span={8}><Typography.Text><strong>Buyer Name:</strong> {data.buyer.name}</Typography.Text></Col>
-        <Col span={8}><Typography.Text><strong>Buyer GSTIN:</strong> {data.buyer.gst}</Typography.Text></Col>
-        <Col span={8}><Typography.Text><strong>Buyer Contact:</strong> {data.buyer.contact}</Typography.Text></Col>
-        <Col span={24}><Typography.Text><strong>Address:</strong> {data.buyer.address}</Typography.Text></Col>
-        <Col span={24}><Typography.Text><strong>Place of Supply:</strong> {data.buyer.placeOfSupply}</Typography.Text></Col>
-      </Row>
-      <Divider />
-      <Table columns={cols} dataSource={data.products} rowKey={p => p.uid} pagination={false} />
-      <Flex justify='end' gap={16} style={{ marginTop: 20 }}>
-        <PDFDownloadLink document={<RecieveNotePDF bill={{ ...data, productDetails }} />} fileName={`Recieve_Note_${data.billNo}_${moment().format('DD/MM/YYYY;HH:mm')}`}>
-          {({ error, loading }) => (
-            <Button loading={loading} disabled={error} danger={error}>{error ? 'PDF Generate Failed' : 'Download Receive Note'}</Button>
-          )}
-        </PDFDownloadLink>
-        <PDFDownloadLink document={<BillPDF bill={{ ...data, productDetails }} />} fileName={`Invoice_${data.billNo}_${moment().format('DD/MM/YYYY;HH:mm')}`}>
-          {({ error, loading }) => (
-            <Button loading={loading} disabled={error} danger={error}>{error ? 'PDF Generate Failed' : 'Download Invoice'}</Button>
-          )}
-        </PDFDownloadLink>
-        {data.state === 'draft' && (
-          <Popconfirm
-            title='Are you sure?'
-            description='This action is irreversible. It will subtract ordered quantity from available stock.'
-            onConfirm={onComplete}
-          >
-            <Button type='primary'>Mark Complete</Button>
-          </Popconfirm>
-        )}
       </Flex>
-      {/* <PDFViewer style={{ width: '100%', height: '100vh' }}>
-        <BillPDF bill={{ ...data, productDetails }} />
-      </PDFViewer> */}
+      <BuyerDetail buyer={buyer} />
+      {data.state !== 'draft' && <Payment id={id} />}
+      <Flex justify='space-between' style={{ marginBottom: 10 }}>
+        <Title level={5}>Orders</Title>
+        <Space>
+          <Button icon={<DownloadOutlined />} onClick={downloadBillPdf} loading={isPdfFetching}>Bill PDF</Button>
+          <Button icon={<DownloadOutlined />} onClick={downloadRecieveNote} loading={isNoteFetching}>Delivery Note</Button>
+          {
+            data.state === 'draft' &&
+            <Popconfirm onConfirm={() => updateBillState('delivered')} title="Are you sure" description='This will subtract order quantity from current stock'>
+              <Button type='primary'>Mark Delivered</Button>
+            </Popconfirm>
+          }
+        </Space>
+      </Flex>
+      <OrderManager billId={id} changeAllowed={data.state === 'draft'} returnAllowed={data.state === 'delivered' && !data.returned} />
+      {
+        data.state === 'delivered' && !data.returned &&
+        <Row justify='end' style={{ margin: '10px 0' }}>
+          <Popconfirm placement='leftTop' title='Caution: This is a one time action only' description='Make sure every return is filed before clicking this. Edit the price of the newly added lots from product section' okText='Execute' onConfirm={() => updateBillState('return')}>
+            <Button type='primary'>Execute Return</Button>
+          </Popconfirm>
+        </Row>
+      }
     </Card>
   )
 }

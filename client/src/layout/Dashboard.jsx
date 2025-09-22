@@ -18,7 +18,7 @@ function Dashboard() {
         </Flex>
       </Header>
       <Layout>
-        <Sider collapsible>
+        <Sider collapsible width={220}>
           <SideMenu />
         </Sider>
         <Content style={{ margin: '10px', overflowY: 'auto', height: '90vh' }}>

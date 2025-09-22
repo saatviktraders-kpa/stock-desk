@@ -1,13 +1,13 @@
 import moment from "moment";
 const BILL_SEQ_LEN = 5;
 
-export function getBillNo(seq, label) {
+export function getBillNo(seq, label, date) {
   const sequ = String(seq + 1).padStart(BILL_SEQ_LEN, '0');
-  return `ST/${label}/${moment().format('MM')}/${sequ}`;
+  return `ST/${label}/${moment(date).format('MM')}/${sequ}`;
 }
 
-export function getCurrentFinancialYearFilter() {
-  const currTime = moment();
+export function getCurrentFinancialYearFilter(time) {
+  const currTime = time ? moment(time) : moment();
   const currMonth = Number(currTime.format('M'));
   let yearOffset;
 
@@ -25,4 +25,27 @@ export function getCurrentFinancialYearFilter() {
   const endOfYear = moment(`${years[1]}-03-31`).endOf('day').toISOString();
 
   return { filter: { createdAt: { $gte: new Date(startOfYear), $lte: new Date(endOfYear) } }, label: yearsShort.join('-') };
+}
+
+export function calculateTableEntries(order, idOnly = false) {
+  return order?.map(curr => {
+    const gst = curr.sgst + curr.cgst;
+    const gstExcludedRate = curr.rate / ((100 + gst) / 100);
+    const discount = gstExcludedRate * (curr.discount / 100);
+    const effectiveRate = gstExcludedRate - discount;
+    const cgst = effectiveRate * (curr.cgst / 100);
+    const sgst = effectiveRate * (curr.sgst / 100);
+
+    return {
+      ...(idOnly ? curr : curr.pid),
+      quantity: curr.quantity,
+      rate: gstExcludedRate,
+      discount: curr.discount,
+      gross: gstExcludedRate * curr.quantity,
+      sgst: sgst * curr.quantity,
+      cgst: cgst * curr.quantity,
+      discountAmt: discount * curr.quantity,
+      net: (effectiveRate + cgst + sgst) * curr.quantity
+    }
+  })
 }

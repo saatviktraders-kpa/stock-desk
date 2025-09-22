@@ -14,7 +14,7 @@ function Header({ bill }) {
           <Text style={{ fontSize: 10 }}>GSTIN: 19BPYPS9484J1ZD</Text>
           <Text style={{ fontSize: 10 }}>Mob: 9331237271 / 9748896633, Email: saatviktraders.kpa@gmail.com</Text>
         </View>
-        <Text style={{ ...styles.bold, fontSize: 10 }}>Bill No.: {bill.billNo}</Text>
+        <Text style={{ ...styles.bold, fontSize: 10 }}>Reference Bill No.: {bill.billNo}</Text>
       </View>
       <View style={[styles.rowsb, { marginTop: 5 }]}>
         <Text style={[styles.bold, { fontSize: 10 }]}>Recieved By</Text>
