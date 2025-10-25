@@ -17,7 +17,7 @@ function ProductSearch({ onAdd, disable }) {
 
   async function onFinish(data) {
     try {
-      if (data.gst) {
+      if (typeof data.gst === 'number' && data.gst >= 0) {
         data.sgst = data.gst / 2;
         data.cgst = data.gst / 2;
         delete data.gst;
