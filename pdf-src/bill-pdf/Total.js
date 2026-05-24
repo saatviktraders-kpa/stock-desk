@@ -39,8 +39,8 @@ function Total({ products }) {
       <Text style={{ fontSize: 10 }}>Total MRP: {tmrp}</Text>
       <Text style={{ fontSize: 10 }}>Total Gross Amount: {gross}</Text>
       <Text style={{ fontSize: 10 }}>Total Discount Amount: {disc}</Text>
-      <Text style={{ fontSize: 10 }}>Total SGST (@ 9%): {sgst}</Text>
-      <Text style={{ fontSize: 10 }}>Total CGST (@ 9%): {cgst}</Text>
+      <Text style={{ fontSize: 10 }}>Total SGST: {sgst}</Text>
+      <Text style={{ fontSize: 10 }}>Total CGST: {cgst}</Text>
       <Text style={{ fontSize: 10 }}>Total Net Amount: {net}</Text>
       <Text style={{ fontSize: 10 }}>Round off: {round}</Text>
       <Text style={{ fontSize: 10, ...styles.bold }}>Total Payable: {pay} INR</Text>

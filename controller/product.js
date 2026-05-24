@@ -11,7 +11,10 @@ class ProductController {
       const query = { isDeleted: false };
       const options = getPaginationOptions(req.query);
       if (req.query.search)
-        query.name = { $regex: req.query.search, $options: 'i' };
+        query.$or = [
+          { name: { $regex: req.query.search, $options: 'i' } },
+          ...(isNaN(req.query.search) ? [] : [{ mrp: Number(req.query.search) }]),
+        ];
       if (req.query.isDeleted)
         query.isDeleted = true;
 
