@@ -59,7 +59,7 @@ class BillModel {
 
     for (const o of result.order) {
       const pid = o.pid._id;
-      const lots = await ProductModel.getProductLots({ pid }, true);
+      const lots = await ProductModel.getProductLots({ pid, isDeleted:false }, true);
 
       o.available = lots.reduce((agg, curr) => agg + curr.quantity, 0);
     }
